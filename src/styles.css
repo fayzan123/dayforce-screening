@@ -53,7 +53,9 @@
   /* — Ink: deep blue-black text ramp — */
   --ink: oklch(26% 0.035 262);
   --ink-muted: oklch(46% 0.032 260);
-  --ink-soft: oklch(60% 0.028 258);
+  /* L tuned to 0.52 so small soft labels clear WCAG AA (4.5:1) on every surface,
+     including the muted/sunken fills. */
+  --ink-soft: oklch(52% 0.03 258);
 
   /* — Drafting rules — */
   --line: oklch(89.5% 0.012 256);
@@ -151,6 +153,28 @@ select:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* Skip link: off-screen until focused, then anchored top-left over the topbar. */
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  padding: var(--space-xs) var(--space-md);
+  color: var(--primary-ink);
+  font-size: var(--fs-sm);
+  font-weight: 760;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform 160ms var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 code {

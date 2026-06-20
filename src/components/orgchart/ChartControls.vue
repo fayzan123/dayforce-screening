@@ -126,6 +126,12 @@ function submitSearch() {
   color: var(--ink-soft);
 }
 
+/* The inner input clears its own outline; surface keyboard focus on the wrapper. */
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+
 .search-box input {
   min-width: 0;
   width: 100%;

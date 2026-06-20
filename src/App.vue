@@ -23,6 +23,8 @@ onMounted(() => {
 
 <template>
   <div class="app-shell">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
     <header class="topbar">
       <div class="brand-block">
         <div class="brand-mark" aria-hidden="true">GC</div>

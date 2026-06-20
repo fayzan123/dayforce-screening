@@ -52,6 +52,7 @@ const toneVar = computed(() => {
     tabindex="0"
     @click="$emit('select', node)"
     @keydown.enter="$emit('select', node)"
+    @keydown.space.prevent="$emit('select', node)"
   >
     <header class="nc-head">
       <span class="nc-avatar" aria-hidden="true">{{ node.data.initials }}</span>
@@ -147,11 +148,16 @@ const toneVar = computed(() => {
   }
 }
 
-.node-card:hover,
-.node-card:focus-visible {
+.node-card:hover {
   border-color: var(--primary-line);
   box-shadow: var(--shadow-sm);
-  outline: none;
+}
+
+.node-card:focus-visible {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .node-card.is-highlighted {
