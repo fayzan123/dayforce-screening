@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 # Internal planning/design docs — kept local, not published
 docs/
+
+# Impeccable design-context (internal, kept local)
+.impeccable.md

@@ -7,8 +7,8 @@ import FilterBar from './FilterBar.vue';
 import HeatmapChart from './HeatmapChart.vue';
 import HorizontalBarChart from './HorizontalBarChart.vue';
 import IcicleChart from './IcicleChart.vue';
-import LevelPyramid from './LevelPyramid.vue';
 import MetricTile from './MetricTile.vue';
+import OrgSilhouette from './OrgSilhouette.vue';
 import ProportionChart from './ProportionChart.vue';
 import SpanByDepartmentChart from './SpanByDepartmentChart.vue';
 import SpanHistogram from './SpanHistogram.vue';
@@ -63,6 +63,12 @@ function viewNodeInOrgChart(node) {
       <MetricTile label="Average span" :value="analytics.summary.avgSpan.toFixed(2)" note="Direct reports per manager" />
     </div>
 
+    <OrgSilhouette
+      :rows="analytics.filteredLevelRows"
+      :active-level="store.filters.value.level"
+      @select="filter('level', $event.level)"
+    />
+
     <div class="analytics-grid">
       <IcicleChart class="wide" :root="store.root.value" @view-node="viewNodeInOrgChart" />
 
@@ -80,8 +86,6 @@ function viewNodeInOrgChart(node) {
         :active-label="store.filters.value.department"
         @select="filter('department', $event.label)"
       />
-
-      <LevelPyramid :rows="analytics.filteredLevelRows" :active-level="store.filters.value.level" @select="filter('level', $event.level)" />
 
       <SpanHistogram :rows="analytics.spanRows" />
 

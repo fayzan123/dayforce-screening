@@ -189,6 +189,10 @@ function reset() {
   padding: 10px;
 }
 
+.inspector-grid div:last-child {
+  grid-column: 1 / -1;
+}
+
 .inspector-grid dt {
   display: flex;
   align-items: center;

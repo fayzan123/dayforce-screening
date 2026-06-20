@@ -1,29 +1,104 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Archivo+Expanded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* Design tokens: light, data-dense enterprise workbench with tinted neutrals and
-   restrained accent colors for hierarchy, focus, and chart distinction. */
+/* ============================================================================
+   ORG AS ARCHITECTURE — design tokens
+   A drafting-precision, editorial light theme for a 40k-employee org explorer.
+   Everything is a semantic OKLCH token so a dark theme is a later additive pass
+   (override the :root values under a [data-theme="dark"] block — see bottom).
+   ========================================================================= */
 :root {
   color-scheme: light;
-  --bg: oklch(96.5% 0.012 205);
-  --surface: oklch(99% 0.006 205);
-  --surface-strong: oklch(100% 0.003 205);
-  --surface-muted: oklch(94.5% 0.015 205);
-  --ink: oklch(22% 0.035 225);
-  --ink-muted: oklch(47% 0.035 225);
-  --ink-soft: oklch(62% 0.03 225);
-  --line: oklch(88% 0.018 210);
-  --line-strong: oklch(78% 0.028 210);
-  --primary: oklch(48% 0.11 190);
-  --primary-ink: oklch(27% 0.08 190);
-  --primary-soft: oklch(91% 0.045 190);
-  --amber: oklch(74% 0.13 78);
-  --coral: oklch(65% 0.15 28);
-  --green: oklch(61% 0.12 150);
-  --violet: oklch(56% 0.13 288);
-  --blue: oklch(58% 0.13 238);
-  --shadow-sm: 0 1px 2px oklch(30% 0.03 220 / 0.08), 0 8px 24px oklch(30% 0.03 220 / 0.05);
+
+  /* — Type families — */
+  --font-display: "Archivo", system-ui, -apple-system, sans-serif;
+  --font-display-x: "Archivo Expanded", "Archivo", system-ui, sans-serif;
+  --font-ui: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* — Type scale (fixed rem; dashboards want spatial predictability) — */
+  --fs-2xs: 0.6875rem; /* 11 — drafting labels */
+  --fs-xs: 0.75rem;    /* 12 */
+  --fs-sm: 0.8125rem;  /* 13 */
+  --fs-base: 0.9375rem;/* 15 */
+  --fs-md: 1.0625rem;  /* 17 */
+  --fs-lg: 1.375rem;   /* 22 */
+  --fs-xl: 1.875rem;   /* 30 */
+  --fs-2xl: 2.625rem;  /* 42 */
+  --fs-3xl: 3.75rem;   /* 60 — silhouette hero */
+
+  /* — Spacing (4pt scale, semantic) — */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  /* — Radii (tight, architectural; not pill-soft) — */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* — Surfaces: cool paper, tinted toward ink-blue, never pure white — */
+  --bg: oklch(97.2% 0.006 256);
+  --surface: oklch(98.6% 0.005 256);
+  --surface-strong: oklch(99.4% 0.0035 256);
+  --surface-muted: oklch(95% 0.009 256);
+  --surface-sunken: oklch(93.6% 0.012 256);
+
+  /* — Ink: deep blue-black text ramp — */
+  --ink: oklch(26% 0.035 262);
+  --ink-muted: oklch(46% 0.032 260);
+  --ink-soft: oklch(60% 0.028 258);
+
+  /* — Drafting rules — */
+  --line: oklch(89.5% 0.012 256);
+  --line-strong: oklch(81% 0.02 256);
+  --grid-line: oklch(86% 0.014 256 / 0.55);
+
+  /* — Primary: structural ink-blue — */
+  --primary: oklch(47% 0.155 262);
+  --primary-strong: oklch(40% 0.16 264);
+  --primary-ink: oklch(33% 0.13 263);
+  --primary-soft: oklch(93.5% 0.035 260);
+  --primary-line: oklch(72% 0.09 262);
+
+  /* — Accent: ochre, reserved for cost emphasis (the 10%) — */
+  --accent: oklch(70% 0.135 71);
+  --accent-strong: oklch(62% 0.14 64);
+  --accent-ink: oklch(47% 0.12 60);
+  --accent-soft: oklch(92.5% 0.05 78);
+
+  /* — Semantic status — */
+  --danger: oklch(55% 0.2 27);
+  --danger-soft: oklch(92% 0.06 30);
+  --positive: oklch(56% 0.12 156);
+
+  /* — Categorical chart ramp (muted, editorial — no neon) — */
+  --c-blue: oklch(52% 0.13 262);
+  --c-ochre: oklch(70% 0.135 71);
+  --c-teal: oklch(58% 0.085 205);
+  --c-clay: oklch(58% 0.13 38);
+  --c-sage: oklch(62% 0.07 150);
+  --c-plum: oklch(50% 0.12 318);
+
+  /* legacy aliases kept so existing components keep resolving while restyled */
+  --amber: var(--accent);
+  --coral: var(--c-clay);
+  --green: var(--c-sage);
+  --violet: var(--c-plum);
+  --blue: var(--c-blue);
+
+  /* — Elevation & motion — */
+  --shadow-xs: 0 1px 2px oklch(30% 0.04 262 / 0.07);
+  --shadow-sm: 0 1px 2px oklch(28% 0.04 262 / 0.08), 0 10px 26px oklch(28% 0.05 262 / 0.06);
+  --shadow-md: 0 2px 4px oklch(28% 0.04 262 / 0.08), 0 18px 44px oklch(26% 0.06 262 / 0.10);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 * {
@@ -40,15 +115,20 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
+  /* Drafting-sheet canvas: a fine measured grid under everything. */
   background:
-    linear-gradient(90deg, oklch(88% 0.015 205 / 0.45) 1px, transparent 1px),
-    linear-gradient(0deg, oklch(88% 0.015 205 / 0.45) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(0deg, var(--grid-line) 1px, transparent 1px),
     var(--bg);
-  background-size: 32px 32px;
+  background-size: 28px 28px;
   color: var(--ink);
-  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   font-size: 16px;
-  line-height: 1.45;
+  font-weight: 450;
+  line-height: 1.5;
+  font-feature-settings: "cv05" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -67,72 +147,28 @@ button:focus {
 
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 code {
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--surface-muted);
-  padding: 0.1rem 0.28rem;
+  padding: 0.1rem 0.3rem;
   color: var(--primary-ink);
   font-size: 0.9em;
 }
 
-/* Global app frame. The app is intentionally a tool surface, not a landing page:
-   one persistent header, one working area, and dense responsive controls. */
-.app-shell {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  height: 100vh;
-  height: 100dvh;
-  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
-    max(12px, env(safe-area-inset-left));
-}
-
-.topbar {
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 76px;
-  border: 1px solid var(--line);
-  border-radius: 8px 8px 0 0;
-  background: color-mix(in oklch, var(--surface) 94%, transparent);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.brand-block {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-mark {
-  display: grid;
-  flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid color-mix(in oklch, var(--primary) 45%, var(--line));
-  border-radius: 8px;
-  background: var(--primary-soft);
-  color: var(--primary-ink);
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Headings carry the architectural display face. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 h1,
@@ -142,14 +178,83 @@ p {
   margin-top: 0;
 }
 
+/* A reusable drafting label: letter-spaced, small, technical. */
+.eyebrow {
+  margin: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Tabular figures everywhere data must align. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   App frame — a tool surface presented like a drawing sheet
+   ========================================================================= */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+}
+
+/* The header reads like an architect's title block: ruled, metadata-forward. */
+.topbar {
+  z-index: 20;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  min-height: 72px;
+  border: 1px solid var(--line-strong);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--surface-strong);
+  padding: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.brand-block {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  border-right: 1px solid var(--line);
+}
+
+.brand-mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--primary-line);
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--surface-strong);
+  font-family: var(--font-display-x);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
 h1 {
-  margin-bottom: 0;
+  margin-bottom: 2px;
   overflow: hidden;
-  color: var(--ink);
-  font-size: 1.12rem;
-  font-weight: 760;
-  letter-spacing: 0;
-  line-height: 1.1;
+  font-family: var(--font-display-x);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -157,27 +262,39 @@ h1 {
 .tab-nav {
   display: flex;
   min-width: max-content;
-  gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-muted);
-  padding: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--space-md);
 }
 
 .tab-nav button {
+  position: relative;
   display: inline-flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: var(--space-xs);
   border: 0;
-  border-radius: 6px;
   background: transparent;
-  padding: 0 14px;
-  color: var(--ink-muted);
+  padding: 0 var(--space-md);
+  color: var(--ink-soft);
   cursor: pointer;
-  font-weight: 720;
-  transition: background 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: color 160ms var(--ease-out);
+}
+
+.tab-nav button::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--space-md);
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms var(--ease-out-quint);
 }
 
 .tab-nav button:hover {
@@ -185,107 +302,125 @@ h1 {
 }
 
 .tab-nav button.active {
-  background: var(--surface-strong);
   color: var(--primary-ink);
-  box-shadow: 0 1px 2px oklch(30% 0.03 220 / 0.08);
+}
+
+.tab-nav button.active::after {
+  transform: scaleX(1);
 }
 
 .main-surface {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  border-left: 1px solid var(--line);
-  border-radius: 0 0 8px 8px;
-  background: color-mix(in oklch, var(--surface) 90%, transparent);
+  border: 1px solid var(--line-strong);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--surface);
 }
 
-/* Summary metrics stay above both tabs and reflect the active analytics filter,
-   giving immediate feedback without requiring a separate status panel. */
+/* ============================================================================
+   Summary strip — a measured readout docked top-left of the working area
+   ========================================================================= */
 .summary-strip {
   position: absolute;
   z-index: 10;
-  top: 12px;
-  left: 12px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(116px, auto));
-  gap: 1px;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  display: flex;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--line);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
   box-shadow: var(--shadow-sm);
 }
 
 .summary-strip div {
   display: grid;
-  gap: 2px;
+  gap: var(--space-2xs);
   min-width: 0;
-  background: color-mix(in oklch, var(--surface-strong) 94%, transparent);
-  padding: 9px 12px;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.summary-strip div + div {
+  border-left: 1px solid var(--line);
 }
 
 .summary-strip span {
+  display: flex;
+  align-items: center;
   color: var(--ink-soft);
-  font-size: 0.72rem;
-  font-weight: 720;
+  font-family: var(--font-display);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .summary-strip em {
   display: inline-flex;
-  margin-left: 5px;
-  border-radius: 999px;
-  background: var(--primary-soft);
+  margin-left: var(--space-xs);
+  border-radius: var(--radius-xs);
+  background: var(--accent-soft);
   padding: 1px 5px;
-  color: var(--primary-ink);
+  color: var(--accent-ink);
+  font-size: 0.92em;
   font-style: normal;
   font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .summary-strip strong {
   color: var(--ink);
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
+/* ============================================================================
+   Loading & error — drafting-styled
+   ========================================================================= */
 .loading-state,
 .error-state {
   display: flex;
   min-height: 100%;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 32px;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
 }
 
 .loading-state > div:last-child,
 .error-state > div {
-  max-width: 560px;
+  max-width: 60ch;
 }
 
 .loading-state h2,
 .error-state h2 {
-  margin-bottom: 8px;
-  font-size: 1.45rem;
-  font-weight: 780;
-  letter-spacing: 0;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .loading-state p,
 .error-state p {
   margin-bottom: 0;
+  max-width: 52ch;
   color: var(--ink-muted);
+  font-size: var(--fs-sm);
 }
 
 .loading-rail {
   position: relative;
-  width: 7px;
-  height: 118px;
+  width: 6px;
+  height: 124px;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--surface-muted);
+  background: var(--surface-sunken);
 }
 
 .loading-rail span {
@@ -293,69 +428,71 @@ h1 {
   inset: 0;
   display: block;
   border-radius: inherit;
-  background: var(--primary);
-  animation: rail-load 1250ms var(--ease-out) infinite;
+  background: linear-gradient(var(--primary), var(--accent));
+  animation: rail-load 1300ms var(--ease-out) infinite;
 }
 
 .error-state {
-  color: oklch(48% 0.16 28);
+  color: var(--danger);
 }
 
 @keyframes rail-load {
-  0% {
-    transform: translateY(-100%);
-  }
-  48%,
-  54% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(100%);
-  }
+  0% { transform: translateY(-100%); }
+  48%, 54% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
 }
 
+/* ============================================================================
+   Responsive
+   ========================================================================= */
 @media (max-width: 760px) {
-  body {
-    overflow: auto;
-  }
+  body { overflow: auto; }
 
   .app-shell {
     min-height: 100vh;
     height: auto;
-    padding: 8px;
+    padding: var(--space-xs);
   }
 
   .topbar {
     position: sticky;
-    top: 8px;
+    top: var(--space-xs);
     flex-wrap: wrap;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
+    border-bottom: 1px solid var(--line-strong);
   }
 
   .brand-block {
     width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
   }
 
   .tab-nav {
     width: 100%;
+    padding: var(--space-2xs) var(--space-xs) var(--space-xs);
   }
 
   .tab-nav button {
     flex: 1 1 0;
-    padding: 0 10px;
+    justify-content: center;
   }
 
   .main-surface {
-    min-height: calc(100vh - 148px);
-    border-radius: 8px;
+    min-height: calc(100vh - 168px);
+    border-radius: var(--radius-md);
   }
 
   .summary-strip {
     position: relative;
     top: auto;
     left: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin: 10px;
+    flex-wrap: wrap;
+    margin: var(--space-xs);
+  }
+
+  .summary-strip div {
+    flex: 1 1 40%;
   }
 }
 
@@ -369,3 +506,24 @@ h1 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================================
+   DARK THEME — intentionally deferred. To enable later, set data-theme="dark"
+   on <html> and override the surface/ink/line ramps here. Components already
+   read only semantic tokens, so no component edits will be required.
+   ========================================================================= */
+/*
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: oklch(20% 0.02 262);
+  --surface: oklch(23% 0.022 262);
+  --surface-strong: oklch(26% 0.024 262);
+  --surface-muted: oklch(28% 0.026 262);
+  --ink: oklch(94% 0.01 256);
+  --ink-muted: oklch(74% 0.02 256);
+  --ink-soft: oklch(60% 0.02 256);
+  --line: oklch(34% 0.02 262);
+  --line-strong: oklch(42% 0.024 262);
+  --grid-line: oklch(40% 0.02 262 / 0.4);
+}
+*/

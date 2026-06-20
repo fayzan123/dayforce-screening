@@ -16,10 +16,10 @@ import NodeCard from './NodeCard.vue';
  */
 
 const NODE_WIDTH = 292;
-const NODE_HEIGHT = 222;
-const NODE_X = 354;
-const NODE_Y = 300;
-const PADDING = 110;
+const NODE_HEIGHT = 212;
+const NODE_X = 348;
+const NODE_Y = 308;
+const PADDING = 120;
 const VISIBLE_NODE_WARNING = 1600;
 
 const props = defineProps({
@@ -171,8 +171,25 @@ onMounted(async () => {
   resizeObserver.observe(viewport.value);
 
   await nextTick();
-  fitToView();
+  initialFrame();
 });
+
+function initialFrame() {
+  // Open on the CEO at a readable scale, top-centered, rather than shrinking the
+  // whole executive row to fit. The org reads as something you explore downward.
+  if (!viewport.value) return;
+  const root = layout.value.nodes[0];
+  if (!root) {
+    fitToView();
+    return;
+  }
+  // Read the element directly: the reactive viewportSize lags behind first paint.
+  const vw = viewport.value.clientWidth || viewportSize.value.width;
+  const scale = 0.8;
+  const x = vw / 2 - root.cx * scale;
+  const y = 150 - root.y * scale;
+  applyTransform(zoomIdentity.translate(x, y).scale(scale));
+}
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
@@ -207,6 +224,14 @@ defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
     >
       <svg class="connector-layer" :width="layout.width" :height="layout.height" aria-hidden="true">
         <path v-for="link in layout.links" :key="`${link.source.id}-${link.target.id}`" :d="linkPath(link)" />
+        <circle
+          v-for="link in layout.links"
+          :key="`dot-${link.target.id}`"
+          class="connector-node"
+          :cx="link.target.cx"
+          :cy="link.target.y"
+          r="2.6"
+        />
       </svg>
 
       <NodeCard
@@ -268,10 +293,16 @@ defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
 
 .connector-layer path {
   fill: none;
-  stroke: color-mix(in oklch, var(--primary) 34%, var(--line-strong));
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
+  stroke: color-mix(in oklch, var(--primary) 40%, var(--line-strong));
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 1.4;
+}
+
+.connector-node {
+  fill: var(--surface);
+  stroke: color-mix(in oklch, var(--primary) 55%, var(--line-strong));
+  stroke-width: 1.4;
 }
 
 @media (max-width: 760px) {

@@ -202,24 +202,25 @@ rect.clickable:hover {
   filter: brightness(0.97);
 }
 
+/* Ink-blue strata: each level a lighter band of the same hue, like a section cut. */
 .depth-0 {
-  fill: var(--primary);
+  fill: var(--primary-strong);
 }
 
 .depth-1 {
-  fill: var(--blue);
+  fill: var(--primary);
 }
 
 .depth-2 {
-  fill: var(--green);
+  fill: oklch(53% 0.135 258);
 }
 
 .depth-3 {
-  fill: var(--amber);
+  fill: oklch(58% 0.115 252);
 }
 
 .depth-4 {
-  fill: var(--violet);
+  fill: oklch(63% 0.095 246);
 }
 
 text {
