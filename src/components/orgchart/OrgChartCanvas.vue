@@ -1,6 +1,9 @@
 <script setup>
+import { easeCubicInOut, easeCubicOut } from 'd3-ease';
 import { hierarchy, tree } from 'd3-hierarchy';
 import { select } from 'd3-selection';
+// Side-effect import: registers selection.transition(), used for animated camera moves.
+import 'd3-transition';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import { formatNumber } from '../../lib/format.js';
@@ -123,24 +126,35 @@ function linkPath(link) {
   return `M ${sx} ${sy} V ${mid} H ${tx} V ${ty}`;
 }
 
-function applyTransform(nextTransform) {
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+function applyTransform(nextTransform, { animate = false, duration = 520 } = {}) {
   if (!viewport.value || !zoomBehavior) return;
-  select(viewport.value).call(zoomBehavior.transform, nextTransform);
+  const selection = select(viewport.value);
+  if (animate && !prefersReducedMotion()) {
+    // A live user gesture interrupts this transition automatically (d3-zoom
+    // cancels in-flight transitions on pointerdown/wheel), so the camera never
+    // fights the cursor.
+    selection.transition().duration(duration).ease(easeCubicInOut).call(zoomBehavior.transform, nextTransform);
+  } else {
+    selection.call(zoomBehavior.transform, nextTransform);
+  }
 }
 
-function fitToView() {
+function fitToView({ animate = false } = {}) {
   if (!viewport.value) return;
   const { width: viewWidth, height: viewHeight } = viewportSize.value;
   const scale = Math.min(viewWidth / layout.value.width, viewHeight / layout.value.height, 1.12) * 0.9;
   const x = (viewWidth - layout.value.width * scale) / 2;
   const y = (viewHeight - layout.value.height * scale) / 2;
-  applyTransform(zoomIdentity.translate(x, y).scale(Math.max(0.2, scale)));
+  applyTransform(zoomIdentity.translate(x, y).scale(Math.max(0.2, scale)), { animate });
 }
 
-function centerNode(id) {
+function centerNode(id, { animate = true } = {}) {
   const target = layout.value.nodes.find((node) => node.id === id);
   if (!target) {
-    fitToView();
+    fitToView({ animate });
     return;
   }
 
@@ -148,15 +162,26 @@ function centerNode(id) {
   const scale = Math.min(Math.max(transform.value.k, 0.78), 1.16);
   const x = width / 2 - target.cx * scale;
   const y = height / 2 - target.cy * scale;
-  applyTransform(zoomIdentity.translate(x, y).scale(scale));
+  applyTransform(zoomIdentity.translate(x, y).scale(scale), { animate });
+}
+
+function scaleByAnimated(factor) {
+  if (!viewport.value || !zoomBehavior) return;
+  const selection = select(viewport.value);
+  if (prefersReducedMotion()) {
+    selection.call(zoomBehavior.scaleBy, factor);
+    return;
+  }
+  // Discrete button zoom glides over a short step rather than snapping.
+  selection.transition().duration(240).ease(easeCubicOut).call(zoomBehavior.scaleBy, factor);
 }
 
 function zoomIn() {
-  if (viewport.value && zoomBehavior) select(viewport.value).call(zoomBehavior.scaleBy, 1.18);
+  scaleByAnimated(1.18);
 }
 
 function zoomOut() {
-  if (viewport.value && zoomBehavior) select(viewport.value).call(zoomBehavior.scaleBy, 0.84);
+  scaleByAnimated(0.84);
 }
 
 onMounted(async () => {
@@ -179,8 +204,24 @@ onMounted(async () => {
   });
   resizeObserver.observe(viewport.value);
 
+  // Seed the viewport size from the element so the first frame (and any pending
+  // focus pan) is measured correctly before the ResizeObserver's first callback.
+  viewportSize.value = {
+    width: Math.max(1, viewport.value.clientWidth),
+    height: Math.max(1, viewport.value.clientHeight),
+  };
+
   await nextTick();
-  initialFrame();
+  // Arriving from a cross-tab "View in Org Chart" jump: the org view remounts
+  // with a focus already pending. Open on the CEO for spatial context, then glide
+  // down to the requested node — the same smooth move as an in-tab jump.
+  if (props.focusNodeId) {
+    initialFrame();
+    await nextTick();
+    centerNode(props.focusNodeId, { animate: true });
+  } else {
+    initialFrame();
+  }
 });
 
 function initialFrame() {

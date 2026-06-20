@@ -38,7 +38,7 @@ function reset() {
     <ChartControls
       @zoom-in="canvas?.zoomIn()"
       @zoom-out="canvas?.zoomOut()"
-      @fit="canvas?.fitToView()"
+      @fit="canvas?.fitToView({ animate: true })"
       @collapse-all="collapseAll"
       @reset="reset"
       @jump="jumpTo"
