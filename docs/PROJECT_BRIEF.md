@@ -8,12 +8,13 @@ Bonus: a second view for organization-wide cost analytics (treat this like a pro
 
 ## Source Files (in this repo)
 
-- `assets/example-org-chart.png` — reference screenshot from the assessment showing the expected node card layout, field labels, and visual hierarchy. Use this as the design baseline, not a strict spec.
-- `data/giga-corp-40k.csv` — the assessment's provided dataset, "Giga Corp (40k)". 40,000 rows, single root (CEO, no Manager value), `level` field already present (1–10). Key columns: `Employee Id`, `Name`, `Job Title`, `Manager` (parent's Employee Id), `Department`, `Location`, `Salary`, `Bonus`, `level`. Several columns (`Photo`, `Performance`, `Project`, `Entity`, `Skill`, `Role`, `Utilization`, `Source`) are mostly sparse/decorative — confirm which are worth surfacing before building UI around them.
+- `/Users/fayzanmalik/Documents/GitHub/dayforce-screening/assets/SCR-20241127-slfy-2.png` — reference screenshot from the assessment showing the expected node card layout, field labels, and visual hierarchy. Use this as the design baseline, not a strict spec.
+- `/Users/fayzanmalik/Documents/GitHub/dayforce-screening/data/Giga_Corp_(40k)_-_Sheet1_(2).csv` — the assessment's provided dataset, "Giga Corp (40k)".
 
 ## Required Node Data (per the assessment)
 
 For each node, calculate and display:
+
 - **Descendant count** (all reports, recursive)
 - **Non-leaf descendant count** (descendants who themselves have reports)
 - **Management cost** — recursive sum of salary for descendants who have subordinates
@@ -55,3 +56,91 @@ Tuesday, June 23, 12:00 PM EST.
 
 "Engineering role — Coding test" (v2024.06.22), authored by Saahil Jaffer, Dave Kim, Oskar Szulc.
 
+# Raw information text
+
+Email:
+
+Ramijha Puspanathan <Ramijha.Puspanathan@dayforce.com>
+Attachments
+
+Jun 18, 2026, 12:30 PM (1 day ago)
+to Ramijha
+
+Hi there,
+
+Thank you for your interest in the Fall 2026 Product Engineer Intern (4 or 8 Months) position at Dayforce.
+
+We are pleased to let you know that after reviewing your application, we would like to move forward with your candidacy and invite you to complete the next stage of our recruitment process.
+
+As part of this stage, please complete the attached screening assessment. The assessment outlines the requirements, instructions, expectations, and submission guidelines. Please review the document carefully before you begin.
+
+Submission Instructions
+
+Complete the assessment according to the instructions provided in the attached document.
+Share your completed submission with me, Ramijha Puspanathan (Ramijha.Puspanathan@dayforce.com)
+Deadline
+Tuesday, June 23 at 12:00 PM EST
+
+Late submissions may not be considered, so we encourage you to begin as soon as possible.
+
+If you have any questions regarding the assessment or submission process, please feel free to reach out.
+
+Once the submission deadline has passed, we will review all completed assessments and contact candidates who are selected to move forward in the interview process. Please note that at least one interview round will take place in person at our Dayforce office in Toronto. Additional details regarding the interview process will be provided to selected candidates at a later stage.
+
+We look forward to reviewing your work and learning more about your skills and experience.
+
+Doc:
+Engineering role
+
+Coding test
+Created by
+
+Saahil Jaffer Dave Kim Oskar Szulc
+Version: 2024.06.22
+
+Given a CSV file containing people data, create a responsive layout using Vue.js and
+Tailwind to display the hierarchy of people’s reporting lines. The interface should allow
+nodes to be expanded and collapsed and display each node’s number of descendants
+and non-leaf descendants.
+Note
+
+- When counting descendants, think how you can optimize the calculation so that
+  the performance is optimal and does not use too much research.
+- Fields like Management cost, IC (individual contributor) cost, management cost
+  ratio, and total cost are calculated based on the salary field.
+- Management Cost is the recursive sum of the salary of descendants who
+  have subordinates reporting to them.
+- IC Cost is the recursive sum of the salary of descendants who do not have
+  anyone reporting to them
+- Total cost is the sum of the salary of every descendant.
+- Management cost ratio is the ratio between individual contributors and
+  managers.
+
+Example
+
+Download link: SCR-20241127-slfy-2.png
+
+Bonus Point
+Once the analysis of the hierarchy is done, create another view that helps users analyze
+the organization’s cost. Imagine you are a product manager and you need to come up with
+your own set of features. You can reference our help doc
+https://docs.agentnoon.com/hub/chart-library to get started. Feel free to imagine what
+other types of analytics you’d add to make it easier for people to visualize the data in
+different ways other than the org chart.
+
+Data
+
+- Giga Corp (40k)
+  What we look for
+- Efficient calculation of the values. Ensure optimal value calculation is done per
+  path.
+- You may find https://d3js.org/d3-hierarchy helpful.
+- Clean UI. We are providing the example, but feel free to make adjustments. We
+  want to see your taste ;)
+  How to send back
+
+Share link to the hosted project via a product like https://codepen.io/ or
+https://codesandbox.io/ or similar. Something that we can click to open and just runs with
+the code on the side.
+
+Looking forward to your submission :)
