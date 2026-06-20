@@ -147,3 +147,4 @@ docs/
 
 # Impeccable design-context (internal, kept local)
 .impeccable.md
+.gstack/

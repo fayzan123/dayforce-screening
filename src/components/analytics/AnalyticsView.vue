@@ -3,22 +3,18 @@ import { computed, ref } from 'vue';
 import { LocateFixed } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
 import { formatCurrency, formatNumber, formatPercent } from '../../lib/format.js';
+import { deriveInsights } from '../../lib/insights.js';
+import { createAnalyticsChartRegistry } from './chartRegistry.js';
 import FilterBar from './FilterBar.vue';
-import HeatmapChart from './HeatmapChart.vue';
-import HorizontalBarChart from './HorizontalBarChart.vue';
-import IcicleChart from './IcicleChart.vue';
+import InsightBriefing from './InsightBriefing.vue';
 import MetricTile from './MetricTile.vue';
-import OrgSilhouette from './OrgSilhouette.vue';
-import ProportionChart from './ProportionChart.vue';
-import SpanByDepartmentChart from './SpanByDepartmentChart.vue';
-import SpanHistogram from './SpanHistogram.vue';
-import StackedCostChart from './StackedCostChart.vue';
 
 const emit = defineEmits(['show-org']);
 const store = useOrgTree();
 const heatmapMode = ref('headcount');
 
 const analytics = computed(() => store.analytics.value);
+const insights = computed(() => deriveInsights(analytics.value));
 
 // A department + location (or level) combination can match nobody. Rather than
 // render a grid of empty charts, show one clear recovery state.
@@ -29,15 +25,52 @@ const activeFilterSummary = computed(() => {
   return [f.department, f.location, f.level ? `Level ${f.level}` : null].filter(Boolean).join(' · ');
 });
 
+const chartRegistry = computed(() => {
+  if (!analytics.value || !store.root.value) return [];
+  return createAnalyticsChartRegistry({
+    analytics: analytics.value,
+    store,
+    root: store.root.value,
+    heatmapMode: heatmapMode.value,
+    setHeatmapMode,
+    filter,
+    viewNodeInOrgChart,
+  });
+});
+
+const leadSilhouette = computed(() => chartRegistry.value.find((chart) => chart.id === 'layer-silhouette') ?? null);
+// The lead silhouette is already shown beside the briefing, so it backs the
+// shape insight without offering a redundant inline copy.
+const briefingCharts = computed(() => chartRegistry.value.filter((chart) => chart.supportsInsight && chart.placement !== 'lead'));
+const exploreCharts = computed(() => chartRegistry.value.filter((chart) => chart.placement === 'explore'));
+
 function filter(key, value) {
   // Filters toggle off when the user clicks the active chip/bar again. That
   // keeps cross-filtering discoverable without extra reset controls per chart.
   store.setFilter(key, value);
 }
 
+function setHeatmapMode(mode) {
+  heatmapMode.value = mode;
+}
+
 function viewInOrgChart() {
   // The bonus view is more useful when findings can be traced back to people in
   // the hierarchy, so this jumps to a deterministic matching employee.
+  store.viewFirstMatchingNode();
+  emit('show-org');
+}
+
+function filterAlreadyMatches(entity) {
+  const current = store.filters.value[entity.key];
+  return entity.key === 'level' ? Number(current) === Number(entity.value) : current === entity.value;
+}
+
+function viewInsightInOrgChart(insight) {
+  const entity = insight.link?.entity;
+  if (entity && !filterAlreadyMatches(entity)) {
+    store.setFilter(entity.key, entity.value);
+  }
   store.viewFirstMatchingNode();
   emit('show-org');
 }
@@ -80,52 +113,41 @@ function viewNodeInOrgChart(node) {
       <MetricTile label="Average span" :value="analytics.summary.avgSpan.toFixed(2)" note="Direct reports per manager" />
     </div>
 
-    <OrgSilhouette
-      :rows="analytics.filteredLevelRows"
-      :active-level="store.filters.value.level"
-      @select="filter('level', $event.level)"
-    />
-
-    <div class="analytics-grid">
-      <IcicleChart class="wide" :root="store.root.value" @view-node="viewNodeInOrgChart" />
-
-      <ProportionChart
-        :rows="analytics.proportionRows"
-        :mode="store.proportionMode.value"
-        @mode="store.setProportionMode"
-        @select="filter('department', $event.label)"
+    <div class="analytics-lead-grid">
+      <InsightBriefing
+        :insights="insights"
+        :filters="store.filters.value"
+        :charts="briefingCharts"
+        @find="viewInsightInOrgChart"
       />
 
-      <HorizontalBarChart
-        title="Department Cost Concentration"
-        :rows="analytics.filteredDepartmentRows"
-        value-key="salary"
-        :active-label="store.filters.value.department"
-        @select="filter('department', $event.label)"
-      />
-
-      <SpanHistogram :rows="analytics.spanRows" />
-
-      <SpanByDepartmentChart :rows="analytics.spanByDepartmentRows" />
-
-      <StackedCostChart
-        :rows="analytics.stackedCostRows"
-        :mode="store.costMode.value"
-        :active-label="store.filters.value.department"
-        @mode="store.setCostMode"
-        @select="filter('department', $event.label)"
-      />
-
-      <HorizontalBarChart
-        title="Location Cost Footprint"
-        :rows="analytics.filteredLocationRows"
-        value-key="salary"
-        :active-label="store.filters.value.location"
-        @select="filter('location', $event.label)"
-      />
-
-      <HeatmapChart class="wide" :heatmap="analytics.heatmap" :mode="heatmapMode" @mode="heatmapMode = $event" />
+      <template v-if="leadSilhouette">
+        <component
+          :is="leadSilhouette.component"
+          class="lead-silhouette"
+          v-bind="leadSilhouette.props"
+          v-on="leadSilhouette.listeners"
+        />
+      </template>
     </div>
+
+    <details class="explore-charts">
+      <summary>
+        <span>Explore all charts</span>
+        <em>{{ exploreCharts.length }} views</em>
+      </summary>
+
+      <div class="analytics-grid">
+        <component
+          :is="chart.component"
+          v-for="chart in exploreCharts"
+          :key="chart.id"
+          :class="chart.className"
+          v-bind="chart.props"
+          v-on="chart.listeners"
+        />
+      </div>
+    </details>
     </template>
   </section>
 </template>
@@ -252,6 +274,72 @@ function viewNodeInOrgChart(node) {
   margin-top: 12px;
 }
 
+.analytics-lead-grid {
+  display: grid;
+  grid-template-columns: minmax(390px, 0.95fr) minmax(480px, 1.05fr);
+  gap: 12px;
+  /* Top-align the columns so expanding an inline chart in the briefing grows
+     only that column — the silhouette keeps its natural height and stays put. */
+  align-items: start;
+  margin-top: 12px;
+}
+
+.lead-silhouette {
+  margin-top: 0;
+}
+
+.explore-charts {
+  margin-top: 12px;
+}
+
+.explore-charts summary {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface-strong);
+  padding: 0 var(--space-md);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: 790;
+  list-style: none;
+}
+
+.explore-charts summary::-webkit-details-marker {
+  display: none;
+}
+
+.explore-charts summary::after {
+  content: '+';
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  color: var(--ink-muted);
+  font-size: var(--fs-md);
+  line-height: 1;
+}
+
+.explore-charts[open] summary::after {
+  content: '-';
+}
+
+.explore-charts summary em {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  font-weight: 730;
+}
+
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -271,6 +359,10 @@ function viewNodeInOrgChart(node) {
   .metric-grid {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
+
+  .analytics-lead-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 860px) {
@@ -289,6 +381,22 @@ function viewNodeInOrgChart(node) {
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .explore-charts summary {
+    align-items: start;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .explore-charts summary::after {
+    position: absolute;
+    right: var(--space-md);
+  }
+
+  .explore-charts summary em {
+    margin-left: 0;
   }
 
   .analytics-grid > * {

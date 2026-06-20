@@ -1,6 +1,22 @@
 # Giga Corp Org Explorer
 
-Interactive org chart visualizer with hierarchy cost analytics for the Dayforce Product Engineer Intern assessment.
+Interactive org chart visualizer with hierarchy cost analytics for the Dayforce Product Engineer Intern assessment. Explore a 40,000-person organization as a zoomable spatial chart, then switch to a cost-analytics view that cross-filters by department, location, and level.
+
+## Live demo
+
+**StackBlitz:** https://stackblitz.com/github/fayzan123/dayforce-screening
+
+StackBlitz imports the repo directly and runs `npm run dev`. The dataset is a single 12 MB CSV, so the first boot takes a moment while it installs, parses 40k rows, and rolls up metrics. For the fastest experience, running locally (below) is recommended.
+
+## Design
+
+The interface follows an **"Org as Architecture"** language — drafting precision with editorial confidence, treating the org like a precisely surveyed structure rather than another rounded-card dashboard.
+
+- **Type & color:** Archivo (display) + Hanken Grotesk (UI) on a paper-tinted, ink-blue OKLCH palette, with ochre reserved for cost emphasis. Tabular figures throughout.
+- **Signature moment:** the organizational silhouette — Giga Corp is dramatically bottom-heavy, so the *shape of the company* becomes the hero graphic in analytics.
+- **Motion:** explicit camera jumps (search, "View in Org Chart", center-selected) pan smoothly via eased d3-zoom transitions; plain selection never moves the camera. All motion respects `prefers-reduced-motion`.
+- **Dark mode:** full `[data-theme="dark"]` token set with a persistent toggle (defaults to the OS preference).
+- **Accessibility:** WCAG AA contrast (measured), visible keyboard focus, a skip link, and charts that never rely on color alone (legends + density scales).
 
 ## Stack
 
@@ -59,4 +75,7 @@ The tests validate the hand-checked rollup fixture and real Giga Corp invariants
 
 ## Submission
 
-Push the repo to GitHub, import it into StackBlitz or CodeSandbox, and submit the hosted link where the reviewer can see code and live preview side by side.
+- **Repo:** https://github.com/fayzan123/dayforce-screening
+- **Live preview:** https://stackblitz.com/github/fayzan123/dayforce-screening
+
+StackBlitz shows the code and the running app side by side. If the hosted preview is slow to boot the 12 MB dataset, clone and run locally with the steps under **Local Development**.
