@@ -18,8 +18,12 @@ function jumpTo(node) {
 }
 
 function selectNode(node) {
-  // A plain card click: highlight + inspector only, never move the camera.
-  if (node) store.selectNode(node.id);
+  // Selecting a card highlights it, fills the inspector, and gently centers it.
+  // The eased d3-zoom pan (same move as the Center-selected control) makes this
+  // read as intentional focus; reduced-motion users get an instant recenter.
+  if (!node) return;
+  store.selectNode(node.id);
+  canvas.value?.centerNode(node.id);
 }
 
 function collapseAll() {

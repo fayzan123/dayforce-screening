@@ -174,6 +174,12 @@ function submitSearch() {
   gap: 5px;
 }
 
+/* Labelled buttons (Collapse, Reset) need side padding so the text isn't cramped
+   against the border; icon-only buttons stay square. */
+.control-group button:has(span) {
+  padding: 0 14px;
+}
+
 .control-group button:hover,
 .search-box > button:hover {
   border-color: var(--line-strong);
