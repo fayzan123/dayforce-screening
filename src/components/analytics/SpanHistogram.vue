@@ -99,8 +99,8 @@ p {
 .column-plot span {
   display: block;
   width: min(64px, 70%);
-  border-radius: 6px 6px 2px 2px;
-  background: var(--coral);
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
 }
 
 strong,

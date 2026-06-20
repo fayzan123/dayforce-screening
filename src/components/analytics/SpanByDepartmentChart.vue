@@ -92,7 +92,7 @@ p {
 .track {
   height: 10px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--surface-muted);
 }
 
@@ -100,7 +100,7 @@ p {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--coral);
+  background: var(--primary);
 }
 
 strong,

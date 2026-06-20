@@ -29,6 +29,18 @@ const segmentTone = {
   Management: 'management',
   IC: 'ic',
 };
+
+// The legend follows whichever segments the active mode produces, so the colors
+// are never left unexplained (and the chart never relies on color alone).
+const legend = computed(() => {
+  const keys = [];
+  for (const row of props.rows) {
+    for (const segment of row.segments) {
+      if (!keys.includes(segment.key)) keys.push(segment.key);
+    }
+  }
+  return keys;
+});
 </script>
 
 <template>
@@ -43,6 +55,13 @@ const segmentTone = {
         <button type="button" :class="{ active: mode === 'role' }" @click="$emit('mode', 'role')">Role</button>
       </div>
     </header>
+
+    <ul class="legend">
+      <li v-for="key in legend" :key="key">
+        <i :class="segmentTone[key]" aria-hidden="true" />
+        {{ key }}
+      </li>
+    </ul>
 
     <div class="stack-list">
       <button
@@ -162,11 +181,35 @@ p {
   white-space: nowrap;
 }
 
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  font-weight: 720;
+}
+
+.legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 .stack-track {
   display: flex;
   height: 12px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--surface-muted);
 }
 

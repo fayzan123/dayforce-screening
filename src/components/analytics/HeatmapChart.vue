@@ -69,6 +69,12 @@ function labelFor(cell) {
         </template>
       </div>
     </div>
+
+    <div class="heat-legend">
+      <span>Fewer</span>
+      <span class="heat-ramp" aria-hidden="true" />
+      <span>{{ mode === 'salary' ? 'More cost' : 'More people' }}</span>
+    </div>
   </section>
 </template>
 
@@ -150,7 +156,7 @@ p {
 .dept-label,
 .heat-cell {
   min-height: 32px;
-  border-radius: 6px;
+  border-radius: 3px;
   font-size: 0.72rem;
   font-weight: 740;
 }
@@ -179,6 +185,26 @@ p {
   background: color-mix(in oklch, var(--blue) calc(var(--alpha) * 86%), var(--surface-muted));
   color: color-mix(in oklch, var(--ink) 86%, var(--primary-ink));
   font-variant-numeric: tabular-nums;
+}
+
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 720;
+}
+
+.heat-ramp {
+  flex: 0 0 132px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--blue) 8%, var(--surface-muted)),
+    color-mix(in oklch, var(--blue) 86%, var(--surface-muted))
+  );
 }
 
 @media (max-width: 620px) {

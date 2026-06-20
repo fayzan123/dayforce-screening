@@ -129,7 +129,7 @@ p {
 .bar-track {
   height: 10px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--surface-muted);
 }
 

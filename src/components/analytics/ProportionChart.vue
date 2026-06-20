@@ -121,7 +121,7 @@ p {
   gap: 3px;
   height: 34px;
   overflow: hidden;
-  border-radius: 7px;
+  border-radius: 3px;
   background: var(--surface-muted);
 }
 
