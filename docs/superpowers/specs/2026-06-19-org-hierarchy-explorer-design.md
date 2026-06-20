@@ -37,10 +37,10 @@ The two graded priorities:
 
 ```
 CSV in /public
-  → PapaParse (streaming, in a Web Worker)            // UI thread never blocks
+  → PapaParse in an explicit Vite worker module        // UI thread never blocks (main-thread fallback)
   → d3.stratify()  builds the hierarchy
-  → ONE post-order pass (d3.hierarchy(...).eachAfter) // writes all metrics onto each node
-  → Object.freeze the node metric payloads           // Vue won't deep-proxy 40k objects
+  → ONE post-order pass (d3.hierarchy(...).eachAfter) // writes a frozen node.metrics onto each node
+  → markRaw(root) held in a shallowRef                // Vue never proxies the 40k nodes
   → useOrgTree() composable exposes the precomputed tree
        ├── OrgChartView   (spatial, expand/collapse)
        └── AnalyticsView  (interactive dashboard)
@@ -50,11 +50,15 @@ Parse + stratify + rollup happen **once**, behind a loading screen. Everything a
 
 ### Module boundaries
 
-- `lib/parseCsv.js` — worker wrapper around PapaParse; returns plain row objects.
+- `lib/parseCsv.js` — runs PapaParse inside an explicit Vite worker module (main-thread
+  fallback); returns plain row objects.
 - `lib/buildTree.js` — `d3.stratify` + the single rollup pass; returns the d3 hierarchy root
-  with metrics attached. Pure, unit-testable, no Vue.
-- `composables/useOrgTree.js` — loads data once, holds the frozen root, exposes derived
-  selectors (search, path-to-node, analytics aggregations).
+  with metrics attached. Pure, unit-testable, no Vue. Validates inputs first (exactly one root,
+  no duplicate `Employee Id`, every non-root `Manager` resolves) since `d3.stratify` throws on
+  orphans/duplicate ids — fail fast with a clear message rather than a cryptic d3 error.
+- `composables/useOrgTree.js` — loads data once; holds the `markRaw`'d root in a `shallowRef`;
+  exposes derived selectors (search, path-to-node, analytics aggregations) and a `shallowRef`
+  list of currently visible nodes that the canvas renders.
 - `components/orgchart/*` — `OrgChartCanvas`, `NodeCard`, `Connectors`, `ChartControls`.
 - `components/analytics/*` — one component per widget + `CrossFilterBar`.
 - `App.vue` — two-tab shell (Org Chart / Analytics) + loading screen.
@@ -77,8 +81,11 @@ the brief's wording):
 | `totalCost` | `mgmtCost + icCost` (Σ salary of all descendants) |
 | `mgmtCostRatio` | `icCost / mgmtCost`, displayed as `X : 1` (IC dollars per management dollar) |
 
-A node is a **manager** iff it has ≥1 child; otherwise a **leaf/IC**. Classification is known
-during the same pass (a node is non-leaf iff `node.children?.length`).
+A node is a **manager** iff it has ≥1 direct report; otherwise a **leaf/IC**. This is captured
+into `node.metrics` during the one-time rollup, while the full tree is intact — equivalently
+`isManager = descendantCount > 0`. We deliberately store it rather than checking `node.children`
+at render time, because the collapse mechanism (§5) empties `children` into `_children`; a
+runtime `children` check would misclassify every collapsed manager as a leaf.
 
 **Definitional calls (explicit, easy to flip if a reviewer reads it differently):**
 - Costs exclude the node's own salary (brief says "sum of salary for descendants").
@@ -89,10 +96,18 @@ Expand/collapse only toggles a `node.expanded` boolean; no metric is ever recomp
 
 ## 5. Org chart view (spatial)
 
-- **Layout:** d3-hierarchy (`d3.tree()` / `d3.hierarchy`) computes x/y for the **currently
-  expanded** subtree only. HTML/Tailwind `NodeCard`s are absolutely positioned at those
-  coordinates; an SVG layer underneath draws connector elbows. This keeps cards fully
-  styleable while d3 does the geometry.
+- **Two separate d3 passes — do not conflate them:**
+  - *Rollup* (once, at load): `d3.hierarchy(root).eachAfter(...)` over the **full** tree writes
+    `node.metrics`. Never re-run.
+  - *Layout* (on each expand/collapse): `d3.tree()` over only the **visible** tree assigns
+    `x`/`y`. Cheap because the visible set is small.
+- **Collapse mechanism:** the canonical d3 pattern — collapsing a node moves its `children`
+  into `_children` (and back on expand). `d3.tree()` only lays out nodes still reachable via
+  `children`, so collapsed subtrees are excluded from layout and render for free.
+- HTML/Tailwind `NodeCard`s are absolutely positioned at the computed `x`/`y`; an SVG layer
+  underneath draws connector elbows. Cards and connectors share one transformed coordinate
+  space (a wrapper div gets the `d3-zoom` `translate/scale`), so they pan/zoom together. This
+  keeps cards fully styleable while d3 does the geometry.
 - **Viewport:** pan/zoom canvas via `d3-zoom`. Initial state centered on the CEO with the
   first 1–2 levels expanded.
 - **Interaction:** click a card's chevron to expand/collapse, with a smooth transition (cards
@@ -112,9 +127,11 @@ represented. All widgets derive from the one precomputed tree; aggregations are 
 filter key, so nothing re-traverses.
 
 **A. High-level org view**
-- **Icicle chart** — from the `d3.hierarchy` root; rectangles sized by `totalCost`
-  (toggle: headcount). Cost-weighted analog of Agentnoon's Org Map / Icicle. Click a band →
-  drill-down + "view in org chart."
+- **Icicle chart** — `d3.partition()` over the `d3.hierarchy` root; rectangles sized by
+  `totalCost` (toggle: headcount). Cost-weighted analog of Agentnoon's Org Map / Icicle.
+  **Depth-limited and zoomable** — render only the top N levels from the current focus
+  (rendering all 40k leaf rects would be unreadable and slow); click a band to re-root the
+  icicle there, and "view in org chart" to jump to that subtree.
 - **Proportion chart** — cost & headcount distribution across the 20 departments (treemap or
   donut).
 
@@ -130,9 +147,10 @@ filter key, so nothing re-traverses.
 
 **D. Cost analysis**
 - **Headcount cost chart** — total cost by department/entity (bar).
-- **Stacked cost chart** — Agentnoon stacks salary/benefits/other; we stack the components we
-  actually have — **base salary + bonus**, and **management vs. IC** cost — per department.
-  This is where the `Bonus` column earns its place.
+- **Stacked cost chart** — per-department stacked bars with a **toggle between two stacking
+  modes**: (1) by comp component — **base salary + bonus**; (2) by role — **management vs. IC**
+  cost. Agentnoon stacks salary/benefits/other; these are the components we actually have, and
+  mode (1) is where the otherwise-decorative `Bonus` column earns its place.
 
 **Interactivity (ambitious layer):** clicking any department / level / location filters every
 widget via shared cross-filter state; a "view in org chart" action jumps to that subtree and
@@ -142,12 +160,28 @@ auto-expands its path. Cross-view navigation is the connective tissue between th
 single rollup that powers the org chart — "efficient calculation per path" holds across both
 views because nothing recomputes the tree.
 
+### Responsive behavior
+
+- **Org chart:** the pan/zoom canvas is inherently size-agnostic and touch-friendly (drag to
+  pan, pinch/wheel to zoom, fit-to-screen button). On small screens the controls collapse into
+  a compact toolbar; node cards keep a fixed legible width and the user navigates by pan/zoom.
+- **Analytics:** the widget grid reflows from multi-column (desktop) to single-column (mobile);
+  wide charts (heatmap, stacked bars) become horizontally scrollable rather than crushed.
+- **Shell:** the two-tab nav stays at the top on all sizes.
+
 ## 7. Performance strategy
 
-- PapaParse in a Web Worker → main thread never blocks during the 40k-row parse.
-- Tree built + rolled up once; metric payloads `Object.freeze`d so Vue's reactivity doesn't
-  deep-proxy 40,000 objects.
-- Only **expanded** nodes are in the render set; collapsed subtrees cost nothing to draw.
+- Parse off the main thread via an **explicit Vite worker module** (`new Worker(new URL(...))`)
+  that imports PapaParse. We deliberately avoid PapaParse's built-in `worker: true`, which
+  tries to load its own script as a worker and is unreliable under bundlers/WebContainers.
+  Fallback: a plain main-thread parse — 40k rows parse in well under a second, so the worker
+  is a smoothness optimization, not a correctness dependency.
+- Tree built + rolled up once; the root is `markRaw`'d and held in a `shallowRef` so Vue never
+  proxies the 40k nodes, and each node's `metrics` is a frozen sub-object. Mutable UI state
+  (`expanded`, `x`, `y`) stays on the node; re-renders are driven by reassigning the visible-
+  node `shallowRef`, not by deep reactivity.
+- Only **visible** (expanded-and-reachable) nodes are in the render set; collapsed subtrees
+  cost nothing to draw.
 - Analytics aggregations memoized per `(filter)` key.
 - Target: interactive within ~1–2s of load on a normal laptop; expand/collapse and filtering
   feel instant.
