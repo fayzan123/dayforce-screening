@@ -170,17 +170,37 @@ function stackedCostRows(nodes, mode = 'comp') {
 }
 
 function proportionRows(nodes, mode = 'salary', { limit = 10 } = {}) {
-  const rows = dimensionRows(nodes, 'department', { limit }).map((row) => ({
+  const valueOf = (row) => (mode === 'headcount' ? row.headcount : row.salary);
+  // Share is measured against every department, not just the visible ones, so a
+  // shown department's percentage is its true slice of the org rather than its
+  // slice of the top N. The long tail is folded into one honest "Other" row.
+  const all = [...dimensionRows(nodes, 'department')].sort((a, b) => valueOf(b) - valueOf(a));
+  const total = Math.max(1, sum(all, valueOf));
+
+  const rows = all.slice(0, limit).map((row) => ({
     label: row.label,
-    value: mode === 'headcount' ? row.headcount : row.salary,
+    value: valueOf(row),
     headcount: row.headcount,
     salary: row.salary,
+    share: valueOf(row) / total,
   }));
-  const total = Math.max(1, sum(rows, (row) => row.value));
-  return rows.map((row) => ({
-    ...row,
-    share: row.value / total,
-  }));
+
+  const rest = all.slice(limit);
+  if (rest.length) {
+    const headcount = sum(rest, (row) => row.headcount);
+    const salary = sum(rest, (row) => row.salary);
+    const value = mode === 'headcount' ? headcount : salary;
+    rows.push({
+      label: `Other (${rest.length})`,
+      value,
+      headcount,
+      salary,
+      share: value / total,
+      isOther: true,
+    });
+  }
+
+  return rows;
 }
 
 /**

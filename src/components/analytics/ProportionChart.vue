@@ -39,18 +39,28 @@ function formatValue(row) {
       <span
         v-for="row in rows"
         :key="row.label"
-        :style="{ flexGrow: Math.max(0.02, row.share), background: `color-mix(in oklch, var(--primary) ${24 + row.share / maxShare * 58}%, var(--surface-muted))` }"
+        :class="{ other: row.isOther }"
+        :style="row.isOther
+          ? { flexGrow: Math.max(0.02, row.share) }
+          : { flexGrow: Math.max(0.02, row.share), background: `color-mix(in oklch, var(--primary) ${24 + row.share / maxShare * 58}%, var(--surface-muted))` }"
       />
     </div>
 
     <div class="proportion-list">
-      <button v-for="row in rows" :key="row.label" type="button" @click="emit('select', row)">
+      <component
+        :is="row.isOther ? 'div' : 'button'"
+        v-for="row in rows"
+        :key="row.label"
+        :type="row.isOther ? undefined : 'button'"
+        :class="{ other: row.isOther }"
+        @click="row.isOther ? null : emit('select', row)"
+      >
         <span>
           <strong>{{ row.label }}</strong>
           <i>{{ formatValue(row) }}</i>
         </span>
         <em>{{ formatPercent(row.share) }}</em>
-      </button>
+      </component>
     </div>
   </section>
 </template>
@@ -129,12 +139,23 @@ p {
   min-width: 5px;
 }
 
+/* The remainder segment reads as an aggregate, not a single department. */
+.proportion-band span.other {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--surface-muted),
+    var(--surface-muted) 4px,
+    color-mix(in oklch, var(--ink) 9%, var(--surface-muted)) 4px,
+    color-mix(in oklch, var(--ink) 9%, var(--surface-muted)) 8px
+  );
+}
+
 .proportion-list {
   display: grid;
   gap: 6px;
 }
 
-.proportion-list button {
+.proportion-list > * {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -144,13 +165,27 @@ p {
   border-radius: 7px;
   background: transparent;
   padding: 6px 7px;
-  cursor: pointer;
   text-align: left;
+}
+
+.proportion-list button {
+  cursor: pointer;
 }
 
 .proportion-list button:hover {
   border-color: var(--line);
   background: var(--surface-muted);
+}
+
+.proportion-list .other {
+  margin-top: 2px;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  cursor: default;
+}
+
+.proportion-list .other strong {
+  color: var(--ink-soft);
 }
 
 .proportion-list span,

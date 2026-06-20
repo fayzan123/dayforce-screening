@@ -43,6 +43,26 @@ describe('analytics selectors', () => {
     expect(headcountAnalytics.proportionRows[0].share).toBeCloseTo(5 / 6);
   });
 
+  it('measures department proportion against the whole org and folds the tail into Other', () => {
+    const rows = [row('r', '', 'Root', 'CEO', 100, 0, 1, 'D0')];
+    for (let i = 1; i <= 13; i += 1) {
+      rows.push(row(`c${i}`, 'r', `C${i}`, 'IC', 100 + i, 0, 2, `D${i}`));
+    }
+
+    const { allNodes } = buildOrgTree(rows);
+    const analytics = createAnalyticsMemo(allNodes)(EMPTY_FILTERS, 'comp', 'salary');
+    const prop = analytics.proportionRows;
+    const totalSalary = allNodes.reduce((sum, node) => sum + node.data.salary, 0);
+
+    // 14 departments, so the top 10 show and the remaining 4 collapse into Other.
+    const other = prop[prop.length - 1];
+    expect(other.isOther).toBe(true);
+    expect(other.label).toBe('Other (4)');
+    // Every share is a slice of the org, so the rows (incl. Other) sum to 1.
+    expect(prop.reduce((sum, r) => sum + r.share, 0)).toBeCloseTo(1, 10);
+    expect(prop[0].share).toBeCloseTo(prop[0].salary / totalSalary, 10);
+  });
+
   it('builds average span by department rows from manager direct-report spans', () => {
     const { allNodes } = buildOrgTree(fixture);
     const analytics = createAnalyticsMemo(allNodes)();

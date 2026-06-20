@@ -11,7 +11,22 @@ const props = defineProps({
 
 const normalizedRows = computed(() => {
   const bySpan = new Map(props.rows.map((row) => [row.span, row]));
-  return [1, 2, 3, 4].map((span) => bySpan.get(span) ?? { span, label: `1:${span}`, headcount: 0, salary: 0 });
+  const base = [1, 2, 3, 4].map((span) => bySpan.get(span) ?? { span, label: `1:${span}`, headcount: 0, salary: 0 });
+
+  // Fold any managers with 5+ direct reports into one bucket so the distribution
+  // never silently drops the long tail. The current dataset tops out at 4, so no
+  // bucket is added then; this only appears if wider spans exist.
+  const tail = props.rows.filter((row) => row.span >= 5);
+  if (tail.length) {
+    base.push({
+      span: 5,
+      label: '1:5+',
+      headcount: tail.reduce((total, row) => total + row.headcount, 0),
+      salary: tail.reduce((total, row) => total + row.salary, 0),
+    });
+  }
+
+  return base;
 });
 
 const maxHeadcount = computed(() => Math.max(1, ...normalizedRows.value.map((row) => row.headcount)));
@@ -24,7 +39,11 @@ const maxHeadcount = computed(() => Math.max(1, ...normalizedRows.value.map((row
       <p>Managers by direct reports</p>
     </header>
 
-    <div class="histogram" aria-label="Span of control distribution">
+    <div
+      class="histogram"
+      :style="{ gridTemplateColumns: `repeat(${normalizedRows.length}, minmax(56px, 1fr))` }"
+      aria-label="Span of control distribution"
+    >
       <div v-for="row in normalizedRows" :key="row.span" class="column">
         <div class="column-plot">
           <span :style="{ height: `${Math.max(2, (row.headcount / maxHeadcount) * 100)}%` }" />
