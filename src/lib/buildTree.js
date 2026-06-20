@@ -27,13 +27,15 @@ import { initialsForName } from './format.js';
 /**
  * @typedef {Object} OrgMetrics
  * @property {number} descendantCount All recursive reports, excluding the node itself.
- * @property {number} nonLeafDescendantCount Recursive reports who are also managers.
+ * @property {number} nonLeafDescendantCount Recursive reports who are also managers (the "manager count").
+ * @property {number} icDescendantCount Recursive reports who are individual contributors.
  * @property {number} mgmtCost Salary sum of descendant managers.
  * @property {number} icCost Salary sum of descendant individual contributors.
  * @property {number} totalCost Salary sum of all descendants.
  * @property {number | null} managerCostShare mgmtCost / totalCost.
  * @property {number | null} icToManagerCostRatio icCost / mgmtCost; this is the written brief's "IC to manager" ratio.
  * @property {number | null} managerToIcCostRatio mgmtCost / icCost.
+ * @property {number | null} managerToIcCountRatio manager headcount / IC headcount.
  */
 
 const REQUIRED_COLUMNS = [
@@ -172,6 +174,9 @@ export function buildOrgTree(rawRows) {
   root.each((node) => {
     node.data.depthFromTree = node.depth + 1;
     node.data.directReportCount = node.children?.length ?? 0;
+    // d3 sets `node.height` to the longest path down to a leaf, which is exactly
+    // the number of management layers nested beneath this node (0 for an IC).
+    node.data.reportingLayers = node.height;
     // Store manager status while the full tree is intact. Rendering only sees a
     // visible subset, so checking visible children later would misclassify nodes.
     node.data.isManager = node.data.directReportCount > 0;
@@ -192,23 +197,29 @@ export function buildOrgTree(rawRows) {
       icCost += (!child.data.isManager ? child.data.salary : 0) + child.metrics.icCost;
     }
 
+    const icDescendantCount = descendantCount - nonLeafDescendantCount;
     const totalCost = mgmtCost + icCost;
     // The written brief asks for the ratio between IC and manager cost. Manager
     // share is kept separately because it is useful and mirrors the screenshot.
     const managerCostShare = totalCost > 0 ? mgmtCost / totalCost : null;
     const icToManagerCostRatio = mgmtCost > 0 ? icCost / mgmtCost : null;
     const managerToIcCostRatio = icCost > 0 ? mgmtCost / icCost : null;
+    // Headcount ratio (the screenshot's "Manager IC Ratio"), distinct from the
+    // cost ratios above: how many managers there are per individual contributor.
+    const managerToIcCountRatio = icDescendantCount > 0 ? nonLeafDescendantCount / icDescendantCount : null;
 
     /** @type {OrgMetrics} */
     node.metrics = Object.freeze({
       descendantCount,
       nonLeafDescendantCount,
+      icDescendantCount,
       mgmtCost,
       icCost,
       totalCost,
       managerCostShare,
       icToManagerCostRatio,
       managerToIcCostRatio,
+      managerToIcCountRatio,
     });
   });
 

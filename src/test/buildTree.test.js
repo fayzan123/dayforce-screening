@@ -51,35 +51,46 @@ describe('buildOrgTree', () => {
     expect(root.metrics).toEqual({
       descendantCount: 5,
       nonLeafDescendantCount: 2,
+      icDescendantCount: 3,
       mgmtCost: 58,
       icCost: 35,
       totalCost: 93,
       managerCostShare: 58 / 93,
       icToManagerCostRatio: 35 / 58,
       managerToIcCostRatio: 58 / 35,
+      managerToIcCountRatio: 2 / 3,
     });
 
     expect(nodeById.get('b').metrics).toEqual({
       descendantCount: 3,
       nonLeafDescendantCount: 1,
+      icDescendantCount: 2,
       mgmtCost: 8,
       icCost: 15,
       totalCost: 23,
       managerCostShare: 8 / 23,
       icToManagerCostRatio: 15 / 8,
       managerToIcCostRatio: 8 / 15,
+      managerToIcCountRatio: 1 / 2,
     });
 
     expect(nodeById.get('f').metrics).toEqual({
       descendantCount: 0,
       nonLeafDescendantCount: 0,
+      icDescendantCount: 0,
       mgmtCost: 0,
       icCost: 0,
       totalCost: 0,
       managerCostShare: null,
       icToManagerCostRatio: null,
       managerToIcCostRatio: null,
+      managerToIcCountRatio: null,
     });
+
+    // Reporting layers = management depth nested below a node (0 for a leaf IC).
+    expect(root.data.reportingLayers).toBe(3);
+    expect(nodeById.get('b').data.reportingLayers).toBe(2);
+    expect(nodeById.get('f').data.reportingLayers).toBe(0);
 
     expect(Object.isFrozen(root.metrics)).toBe(true);
   });

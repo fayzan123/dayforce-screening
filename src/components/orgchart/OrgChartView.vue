@@ -2,7 +2,7 @@
 import { nextTick, ref } from 'vue';
 import { Users } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
-import { formatCurrency, formatNumber, formatPercent, formatRatio } from '../../lib/format.js';
+import { formatCurrency, formatMultiple, formatNumber, formatPercent } from '../../lib/format.js';
 import ChartControls from './ChartControls.vue';
 import OrgChartCanvas from './OrgChartCanvas.vue';
 
@@ -73,7 +73,10 @@ function reset() {
       <div class="inspector-meta">
         <span>{{ store.selectedNode.value.data.department }}</span>
         <span>{{ store.selectedNode.value.data.location }}</span>
-        <span>Level {{ store.selectedNode.value.data.level }}</span>
+        <span>Layer {{ store.selectedNode.value.data.level }}</span>
+        <span v-if="store.selectedNode.value.data.isManager">
+          {{ store.selectedNode.value.data.reportingLayers }} reporting layers
+        </span>
       </div>
 
       <dl class="inspector-grid">
@@ -82,8 +85,16 @@ function reset() {
           <dd>{{ formatNumber(store.selectedNode.value.metrics.descendantCount) }}</dd>
         </div>
         <div>
-          <dt>Non-leaf</dt>
+          <dt>Direct reports</dt>
+          <dd>{{ formatNumber(store.selectedNode.value.data.directReportCount) }}</dd>
+        </div>
+        <div>
+          <dt>Managers</dt>
           <dd>{{ formatNumber(store.selectedNode.value.metrics.nonLeafDescendantCount) }}</dd>
+        </div>
+        <div>
+          <dt>ICs</dt>
+          <dd>{{ formatNumber(store.selectedNode.value.metrics.icDescendantCount) }}</dd>
         </div>
         <div>
           <dt>Total cost</dt>
@@ -102,8 +113,8 @@ function reset() {
           <dd>{{ formatPercent(store.selectedNode.value.metrics.managerCostShare) }}</dd>
         </div>
         <div>
-          <dt>IC:Mgmt</dt>
-          <dd>{{ formatRatio(store.selectedNode.value.metrics.icToManagerCostRatio) }}</dd>
+          <dt>Mgr:IC ratio</dt>
+          <dd>{{ formatMultiple(store.selectedNode.value.metrics.managerToIcCountRatio, '') }}</dd>
         </div>
       </dl>
     </aside>

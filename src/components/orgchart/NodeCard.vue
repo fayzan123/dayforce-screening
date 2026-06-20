@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { ChevronDown, ChevronRight } from '@lucide/vue';
-import { formatCurrency, formatNumber, formatPercent, formatRatio } from '../../lib/format.js';
+import { formatCurrency, formatMultiple, formatNumber, formatPercent } from '../../lib/format.js';
 
 const props = defineProps({
   node: {
@@ -75,7 +75,14 @@ const toneVar = computed(() => {
 
     <div class="nc-meta">
       <span class="nc-dept"><i class="nc-dot" aria-hidden="true" />{{ node.data.department }}</span>
-      <span class="nc-lvl">L{{ node.data.level }}</span>
+      <span class="nc-tags">
+        <span class="nc-lvl" :title="`Layer ${node.data.level}`">L{{ node.data.level }}</span>
+        <span
+          v-if="node.data.isManager"
+          class="nc-lvl nc-lvl-sub"
+          :title="`${node.data.reportingLayers} reporting layers below`"
+        >{{ node.data.reportingLayers }}<span aria-hidden="true">↓</span></span>
+      </span>
     </div>
     <div class="nc-loc">{{ node.data.location }}</div>
 
@@ -86,12 +93,12 @@ const toneVar = computed(() => {
           <dd class="tnum">{{ formatNumber(node.metrics.descendantCount, { compact: true }) }}</dd>
         </div>
         <div>
-          <dt>Sub-mgrs</dt>
+          <dt>Managers</dt>
           <dd class="tnum">{{ formatNumber(node.metrics.nonLeafDescendantCount, { compact: true }) }}</dd>
         </div>
         <div>
-          <dt>Direct</dt>
-          <dd class="tnum">{{ formatNumber(node.data.directReportCount) }}</dd>
+          <dt>ICs</dt>
+          <dd class="tnum nc-accent">{{ formatNumber(node.metrics.icDescendantCount, { compact: true }) }}</dd>
         </div>
       </dl>
 
@@ -111,8 +118,13 @@ const toneVar = computed(() => {
       </dl>
 
       <footer class="nc-foot">
-        <span class="nc-ratio">IC:Mgmt <strong class="tnum">{{ formatRatio(node.metrics.icToManagerCostRatio) }}</strong></span>
-        <span class="nc-share tnum">{{ formatPercent(node.metrics.managerCostShare) }} mgmt</span>
+        <span class="nc-ratio" title="Manager to IC headcount ratio">
+          Mgr:IC <strong class="tnum">{{ formatMultiple(node.metrics.managerToIcCountRatio, '') }}</strong>
+        </span>
+        <span class="nc-foot-tags">
+          <span class="nc-share tnum" title="Direct reports">{{ formatNumber(node.data.directReportCount) }} direct</span>
+          <span class="nc-share tnum" title="Share of cost spent on management">{{ formatPercent(node.metrics.managerCostShare) }} mgmt</span>
+        </span>
       </footer>
     </template>
 
@@ -279,6 +291,13 @@ const toneVar = computed(() => {
   background: var(--tone);
 }
 
+.nc-tags {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
 .nc-lvl {
   flex: 0 0 auto;
   color: var(--ink-soft);
@@ -286,6 +305,18 @@ const toneVar = computed(() => {
   font-size: var(--fs-2xs);
   font-weight: 700;
   letter-spacing: 0.06em;
+}
+
+/* Reporting layers nested below this node — quieter than the node's own layer. */
+.nc-lvl-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-muted);
+  padding: 1px 5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
 }
 
 .nc-loc {
@@ -374,6 +405,13 @@ const toneVar = computed(() => {
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
+}
+
+.nc-foot-tags {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
 }
 
 .nc-share {
