@@ -1,0 +1,128 @@
+<script setup>
+import { computed } from 'vue';
+import { formatCurrency, formatNumber } from '../../lib/format.js';
+
+const props = defineProps({
+  rows: {
+    type: Array,
+    required: true,
+  },
+});
+
+const normalizedRows = computed(() => {
+  const bySpan = new Map(props.rows.map((row) => [row.span, row]));
+  return [1, 2, 3, 4].map((span) => bySpan.get(span) ?? { span, label: `1:${span}`, headcount: 0, salary: 0 });
+});
+
+const maxHeadcount = computed(() => Math.max(1, ...normalizedRows.value.map((row) => row.headcount)));
+</script>
+
+<template>
+  <section class="chart-card">
+    <header>
+      <h2>Span of Control</h2>
+      <p>Managers by direct reports</p>
+    </header>
+
+    <div class="histogram" aria-label="Span of control distribution">
+      <div v-for="row in normalizedRows" :key="row.span" class="column">
+        <div class="column-plot">
+          <span :style="{ height: `${Math.max(2, (row.headcount / maxHeadcount) * 100)}%` }" />
+        </div>
+        <strong>{{ row.label }}</strong>
+        <em>{{ formatNumber(row.headcount) }}</em>
+        <small>{{ formatCurrency(row.salary) }}</small>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.chart-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+h2,
+p {
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 790;
+}
+
+p {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 720;
+}
+
+.histogram {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(64px, 1fr));
+  gap: 10px;
+  min-height: 230px;
+}
+
+.column {
+  display: grid;
+  grid-template-rows: minmax(110px, 1fr) auto auto auto;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+}
+
+.column-plot {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  padding: 8px;
+}
+
+.column-plot span {
+  display: block;
+  width: min(64px, 70%);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--coral);
+}
+
+strong,
+em,
+small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+em,
+small {
+  color: var(--ink-muted);
+  font-size: 0.73rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  font-weight: 720;
+}
+</style>

@@ -1,0 +1,360 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+@import "tailwindcss";
+
+/* Design tokens: light, data-dense enterprise workbench with tinted neutrals and
+   restrained accent colors for hierarchy, focus, and chart distinction. */
+:root {
+  color-scheme: light;
+  --bg: oklch(96.5% 0.012 205);
+  --surface: oklch(99% 0.006 205);
+  --surface-strong: oklch(100% 0.003 205);
+  --surface-muted: oklch(94.5% 0.015 205);
+  --ink: oklch(22% 0.035 225);
+  --ink-muted: oklch(47% 0.035 225);
+  --ink-soft: oklch(62% 0.03 225);
+  --line: oklch(88% 0.018 210);
+  --line-strong: oklch(78% 0.028 210);
+  --primary: oklch(48% 0.11 190);
+  --primary-ink: oklch(27% 0.08 190);
+  --primary-soft: oklch(91% 0.045 190);
+  --amber: oklch(74% 0.13 78);
+  --coral: oklch(65% 0.15 28);
+  --green: oklch(61% 0.12 150);
+  --violet: oklch(56% 0.13 288);
+  --blue: oklch(58% 0.13 238);
+  --shadow-sm: 0 1px 2px oklch(30% 0.03 220 / 0.08), 0 8px 24px oklch(30% 0.03 220 / 0.05);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--bg);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, oklch(88% 0.015 205 / 0.45) 1px, transparent 1px),
+    linear-gradient(0deg, oklch(88% 0.015 205 / 0.45) 1px, transparent 1px),
+    var(--bg);
+  background-size: 32px 32px;
+  color: var(--ink);
+  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+code {
+  border-radius: 4px;
+  background: var(--surface-muted);
+  padding: 0.1rem 0.28rem;
+  color: var(--primary-ink);
+  font-size: 0.9em;
+}
+
+/* Global app frame. The app is intentionally a tool surface, not a landing page:
+   one persistent header, one working area, and dense responsive controls. */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+}
+
+.topbar {
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 76px;
+  border: 1px solid var(--line);
+  border-radius: 8px 8px 0 0;
+  background: color-mix(in oklch, var(--surface) 94%, transparent);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-block {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid color-mix(in oklch, var(--primary) 45%, var(--line));
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1.12rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-nav {
+  display: flex;
+  min-width: max-content;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  padding: 4px;
+}
+
+.tab-nav button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 0 14px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-weight: 720;
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.tab-nav button:hover {
+  color: var(--ink);
+}
+
+.tab-nav button.active {
+  background: var(--surface-strong);
+  color: var(--primary-ink);
+  box-shadow: 0 1px 2px oklch(30% 0.03 220 / 0.08);
+}
+
+.main-surface {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  background: color-mix(in oklch, var(--surface) 90%, transparent);
+}
+
+/* Summary metrics stay above both tabs and reflect the active analytics filter,
+   giving immediate feedback without requiring a separate status panel. */
+.summary-strip {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(116px, auto));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-strip div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  background: color-mix(in oklch, var(--surface-strong) 94%, transparent);
+  padding: 9px 12px;
+}
+
+.summary-strip span {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 720;
+}
+
+.summary-strip strong {
+  color: var(--ink);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 32px;
+}
+
+.loading-state > div:last-child,
+.error-state > div {
+  max-width: 560px;
+}
+
+.loading-state h2,
+.error-state h2 {
+  margin-bottom: 8px;
+  font-size: 1.45rem;
+  font-weight: 780;
+  letter-spacing: 0;
+}
+
+.loading-state p,
+.error-state p {
+  margin-bottom: 0;
+  color: var(--ink-muted);
+}
+
+.loading-rail {
+  position: relative;
+  width: 7px;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
+.loading-rail span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  background: var(--primary);
+  animation: rail-load 1250ms var(--ease-out) infinite;
+}
+
+.error-state {
+  color: oklch(48% 0.16 28);
+}
+
+@keyframes rail-load {
+  0% {
+    transform: translateY(-100%);
+  }
+  48%,
+  54% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 760px) {
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    min-height: 100vh;
+    height: auto;
+    padding: 8px;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 8px;
+    flex-wrap: wrap;
+    border-radius: 8px;
+  }
+
+  .brand-block {
+    width: 100%;
+  }
+
+  .tab-nav {
+    width: 100%;
+  }
+
+  .tab-nav button {
+    flex: 1 1 0;
+    padding: 0 10px;
+  }
+
+  .main-surface {
+    min-height: calc(100vh - 148px);
+    border-radius: 8px;
+  }
+
+  .summary-strip {
+    position: relative;
+    top: auto;
+    left: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

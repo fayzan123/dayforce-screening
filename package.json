@@ -1,0 +1,46 @@
+{
+  "name": "dayforce-screening",
+  "version": "1.0.0",
+  "description": "Interactive org chart visualizer with hierarchy cost analytics. Vue 3, Tailwind, d3-hierarchy",
+  "type": "module",
+  "private": true,
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fayzan123/dayforce-screening.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fayzan123/dayforce-screening/issues"
+  },
+  "homepage": "https://github.com/fayzan123/dayforce-screening#readme",
+  "dependencies": {
+    "@lucide/vue": "^1.21.0",
+    "@tailwindcss/vite": "^4.3.1",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "d3-array": "^3.2.4",
+    "d3-hierarchy": "^3.1.2",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-zoom": "^3.0.0",
+    "papaparse": "^5.5.4",
+    "tailwindcss": "^4.3.1",
+    "vite": "^8.0.16",
+    "vue": "^3.5.38"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.9"
+  }
+}
