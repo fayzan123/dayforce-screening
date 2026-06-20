@@ -1,7 +1,8 @@
 <script setup>
+import { computed } from 'vue';
 import { X } from '@lucide/vue';
 
-defineProps({
+const props = defineProps({
   analytics: {
     type: Object,
     required: true,
@@ -13,6 +14,12 @@ defineProps({
 });
 
 defineEmits(['filter', 'clear']);
+
+// Drive the Clear affordance off real state so it only appears when there is
+// something to clear, and can name how many filters are active.
+const activeCount = computed(
+  () => ['department', 'location', 'level'].filter((key) => props.filters[key] != null).length,
+);
 </script>
 
 <template>
@@ -20,48 +27,60 @@ defineEmits(['filter', 'clear']);
     dashboard into a long form. The full dataset still feeds every chart. -->
   <section class="filter-bar" aria-label="Analytics filters">
     <div class="filter-group">
-      <span>Department</span>
-      <button
-        v-for="row in analytics.departments.slice(0, 7)"
-        :key="row.label"
-        type="button"
-        :class="{ active: filters.department === row.label }"
-        @click="$emit('filter', 'department', row.label)"
-      >
-        {{ row.label }}
-      </button>
+      <span id="filter-department">Department</span>
+      <div class="filter-options" role="group" aria-labelledby="filter-department">
+        <button
+          v-for="row in analytics.departments.slice(0, 7)"
+          :key="row.label"
+          type="button"
+          :class="{ active: filters.department === row.label }"
+          :aria-pressed="filters.department === row.label"
+          @click="$emit('filter', 'department', row.label)"
+        >
+          {{ row.label }}
+        </button>
+      </div>
     </div>
 
-    <div class="filter-group compact">
-      <span>Location</span>
-      <button
-        v-for="row in analytics.locations.slice(0, 5)"
-        :key="row.label"
-        type="button"
-        :class="{ active: filters.location === row.label }"
-        @click="$emit('filter', 'location', row.label)"
-      >
-        {{ row.label }}
-      </button>
+    <div class="filter-group">
+      <span id="filter-location">Location</span>
+      <div class="filter-options" role="group" aria-labelledby="filter-location">
+        <button
+          v-for="row in analytics.locations.slice(0, 5)"
+          :key="row.label"
+          type="button"
+          :class="{ active: filters.location === row.label }"
+          :aria-pressed="filters.location === row.label"
+          @click="$emit('filter', 'location', row.label)"
+        >
+          {{ row.label }}
+        </button>
+      </div>
     </div>
 
-    <div class="filter-group levels">
-      <span>Level</span>
-      <button
-        v-for="row in analytics.levels"
-        :key="row.level"
-        type="button"
-        :class="{ active: filters.level === row.level }"
-        @click="$emit('filter', 'level', row.level)"
-      >
-        {{ row.level }}
-      </button>
+    <div class="filter-group">
+      <span id="filter-level">Level</span>
+      <div class="filter-options levels" role="group" aria-labelledby="filter-level">
+        <button
+          v-for="row in analytics.levels"
+          :key="row.level"
+          type="button"
+          :class="{ active: filters.level === row.level }"
+          :aria-pressed="filters.level === row.level"
+          :aria-label="`Level ${row.level}`"
+          @click="$emit('filter', 'level', row.level)"
+        >
+          {{ row.level }}
+        </button>
+      </div>
     </div>
 
-    <button class="clear-button" type="button" @click="$emit('clear')">
-      <X :size="16" aria-hidden="true" />
-      Clear
-    </button>
+    <footer v-if="activeCount" class="filter-footer">
+      <button class="clear-button" type="button" @click="$emit('clear')">
+        <X :size="16" aria-hidden="true" />
+        Clear {{ activeCount === 1 ? 'filter' : 'filters' }} ({{ activeCount }})
+      </button>
+    </footer>
   </section>
 </template>
 
@@ -72,26 +91,35 @@ defineEmits(['filter', 'clear']);
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-strong);
-  padding: 12px;
+  padding: 12px 14px;
   box-shadow: var(--shadow-sm);
 }
 
 .filter-group {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.filter-group + .filter-group {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
 }
 
 .filter-group span {
-  flex: 0 0 auto;
+  padding-top: 8px;
   color: var(--ink-soft);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .filter-group button,
@@ -104,12 +132,16 @@ defineEmits(['filter', 'clear']);
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
-  padding: 0 10px;
+  padding: 0 12px;
   color: var(--ink-muted);
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 740;
   white-space: nowrap;
+  transition:
+    background 140ms var(--ease-out),
+    border-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
 }
 
 .filter-group button:hover,
@@ -121,22 +153,26 @@ defineEmits(['filter', 'clear']);
 }
 
 .levels button {
-  min-width: 34px;
+  min-width: 38px;
   padding: 0 8px;
+  font-variant-numeric: tabular-nums;
 }
 
-.clear-button {
-  justify-self: start;
+.filter-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
 }
 
-@media (min-width: 980px) {
-  .filter-bar {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
-    align-items: center;
+@media (max-width: 600px) {
+  .filter-group {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
-  .clear-button {
-    justify-self: end;
+  .filter-group span {
+    padding-top: 0;
   }
 }
 </style>
