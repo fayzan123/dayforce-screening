@@ -9,13 +9,17 @@ import OrgChartCanvas from './OrgChartCanvas.vue';
 const store = useOrgTree();
 const canvas = ref(null);
 
-async function jumpTo(node) {
-  // Search and selection both expand the ancestor path before panning, which
-  // guarantees the target exists in the visible-only layout.
+function jumpTo(node) {
+  // Explicit jump (search result, center-selected): expand the ancestor path and
+  // pan to it. expandPathTo bumps the focus version, which the canvas watches to
+  // recenter — so we don't pan here directly.
   if (!node) return;
   store.expandPathTo(node.id);
-  await nextTick();
-  canvas.value?.centerNode(node.id);
+}
+
+function selectNode(node) {
+  // A plain card click: highlight + inspector only, never move the camera.
+  if (node) store.selectNode(node.id);
 }
 
 function collapseAll() {
@@ -44,9 +48,12 @@ function reset() {
       ref="canvas"
       :root="store.root.value"
       :expanded-ids="store.expandedIds.value"
-      :highlighted-node-id="store.highlightedNodeId.value"
+      :selected-node-id="store.selectedNodeId.value"
+      :focus-node-id="store.focusNodeId.value"
+      :focus-version="store.focusVersion.value"
       @toggle="store.toggleNode"
-      @select="jumpTo"
+      @select="selectNode"
+      @deselect="store.clearSelection"
     />
 
     <aside v-if="store.selectedNode.value" class="node-inspector" aria-label="Selected employee metrics">

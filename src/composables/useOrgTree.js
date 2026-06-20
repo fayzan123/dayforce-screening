@@ -31,15 +31,19 @@ function createStore() {
   const error = ref(null);
   const expandedIds = shallowRef(new Set());
   const selectedNodeId = ref(null);
-  const highlightedNodeId = ref(null);
+  // Panning the camera is a separate concern from selection: a plain card click
+  // should only update the inspector/highlight, never yank the viewport. Camera
+  // moves are driven by bumping focusVersion (search, jump, center-selected).
+  const focusNodeId = ref(null);
+  const focusVersion = ref(0);
   const filters = ref(cloneFilters(EMPTY_FILTERS));
   const costMode = ref('comp');
   const proportionMode = ref('salary');
   const getAnalytics = shallowRef(null);
 
   const selectedNode = computed(() => {
-    if (!selectedNodeId.value) return root.value;
-    return nodeById.value.get(selectedNodeId.value) ?? root.value;
+    if (!selectedNodeId.value) return null;
+    return nodeById.value.get(selectedNodeId.value) ?? null;
   });
 
   const analytics = computed(() => {
@@ -78,7 +82,6 @@ function createStore() {
       }
       expandedIds.value = initialExpanded;
       selectedNodeId.value = built.root.id;
-      highlightedNodeId.value = built.root.id;
       loadState.value = 'loaded';
     } catch (caught) {
       error.value = caught instanceof Error ? caught : new Error(String(caught));
@@ -118,7 +121,15 @@ function createStore() {
     }
     expandedIds.value = next;
     selectedNodeId.value = root.value.id;
-    highlightedNodeId.value = root.value.id;
+  }
+
+  function selectNode(id) {
+    // Selection only: drives the inspector and the highlighted card. No camera move.
+    selectedNodeId.value = id;
+  }
+
+  function clearSelection() {
+    selectedNodeId.value = null;
   }
 
   function expandPathTo(id) {
@@ -133,7 +144,10 @@ function createStore() {
     }
     expandedIds.value = next;
     selectedNodeId.value = target.id;
-    highlightedNodeId.value = target.id;
+    // Bump the focus version so the canvas pans to this node even if it is the
+    // same id as a previous focus request.
+    focusNodeId.value = target.id;
+    focusVersion.value += 1;
     return target;
   }
 
@@ -203,7 +217,8 @@ function createStore() {
     expandedIds,
     selectedNodeId,
     selectedNode,
-    highlightedNodeId,
+    focusNodeId,
+    focusVersion,
     filters,
     costMode,
     proportionMode,
@@ -216,6 +231,8 @@ function createStore() {
     toggleNode,
     collapseAll,
     resetExpansion,
+    selectNode,
+    clearSelection,
     expandPathTo,
     searchNodes,
     setFilter,

@@ -31,18 +31,27 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  highlightedNodeId: {
+  selectedNodeId: {
     type: String,
     default: null,
   },
+  focusNodeId: {
+    type: String,
+    default: null,
+  },
+  focusVersion: {
+    type: Number,
+    default: 0,
+  },
 });
 
-const emit = defineEmits(['toggle', 'select']);
+const emit = defineEmits(['toggle', 'select', 'deselect']);
 
 const viewport = ref(null);
 const transform = shallowRef(zoomIdentity);
 let zoomBehavior;
 let resizeObserver;
+let pointerDown = null;
 const viewportSize = ref({ width: 1, height: 1 });
 
 function cloneVisible(node) {
@@ -197,19 +206,35 @@ onBeforeUnmount(() => {
 });
 
 watch(
-  () => props.highlightedNodeId,
-  async (id) => {
-    if (!id) return;
+  () => props.focusVersion,
+  async () => {
+    if (!props.focusNodeId) return;
     await nextTick();
-    centerNode(id);
+    centerNode(props.focusNodeId);
   },
 );
+
+function onBackgroundPointerDown(event) {
+  pointerDown = { x: event.clientX, y: event.clientY };
+}
+
+function onBackgroundClick(event) {
+  // A click on empty canvas deselects. Clicks that land on a card are handled by
+  // the card itself, and a click that follows a pan (pointer moved) is ignored.
+  if (event.target.closest('.node-card')) return;
+  if (pointerDown) {
+    const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
+    pointerDown = null;
+    if (moved > 6) return;
+  }
+  emit('deselect');
+}
 
 defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
 </script>
 
 <template>
-  <div ref="viewport" class="chart-viewport">
+  <div ref="viewport" class="chart-viewport" @pointerdown="onBackgroundPointerDown" @click="onBackgroundClick">
     <div v-if="hasLargeVisibleSet" class="visible-warning" role="status">
       {{ formatNumber(layout.nodes.length) }} cards visible. Collapse branches for smoother pan and zoom.
     </div>
@@ -239,7 +264,7 @@ defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
         :key="node.id"
         :node="node.source"
         :expanded="expandedIds.has(node.id)"
-        :highlighted="highlightedNodeId === node.id"
+        :highlighted="selectedNodeId === node.id"
         :style="{ transform: `translate3d(${node.x}px, ${node.y}px, 0)` }"
         @toggle="emit('toggle', $event)"
         @select="emit('select', $event)"
