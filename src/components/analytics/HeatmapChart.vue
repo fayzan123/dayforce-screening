@@ -35,6 +35,15 @@ function cellAlpha(cell) {
 function labelFor(cell) {
   return props.mode === 'salary' ? formatCurrency(cell.salary) : formatNumber(cell.headcount);
 }
+
+// The number rendered inside each cell follows the active mode, compact so it
+// fits the fixed cell width. Empty cells (no people) stay blank in both modes.
+function cellText(cell) {
+  if (!cell.headcount) return '';
+  return props.mode === 'salary'
+    ? formatCurrency(cell.salary)
+    : formatNumber(cell.headcount, { compact: true });
+}
 </script>
 
 <template>
@@ -64,7 +73,7 @@ function labelFor(cell) {
             :title="`${department}, level ${cell.level}: ${labelFor(cell)}`"
             :style="{ '--alpha': cellAlpha(cell) }"
           >
-            {{ cell.headcount ? formatNumber(cell.headcount, { compact: true }) : '' }}
+            {{ cellText(cell) }}
           </span>
         </template>
       </div>
