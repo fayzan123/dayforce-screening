@@ -3,6 +3,7 @@ import { hierarchy, tree } from 'd3-hierarchy';
 import { select } from 'd3-selection';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
+import { formatNumber } from '../../lib/format.js';
 import NodeCard from './NodeCard.vue';
 
 /**
@@ -19,6 +20,7 @@ const NODE_HEIGHT = 222;
 const NODE_X = 354;
 const NODE_Y = 300;
 const PADDING = 110;
+const VISIBLE_NODE_WARNING = 1600;
 
 const props = defineProps({
   root: {
@@ -62,10 +64,17 @@ const layout = computed(() => {
   const nodes = visibleRoot.descendants();
   // d3 coordinates can be negative depending on expansion shape. Normalize the
   // layout into a positive canvas so HTML cards and SVG connectors share space.
-  const minX = Math.min(...nodes.map((node) => node.x - NODE_WIDTH / 2));
-  const maxX = Math.max(...nodes.map((node) => node.x + NODE_WIDTH / 2));
-  const minY = Math.min(...nodes.map((node) => node.y));
-  const maxY = Math.max(...nodes.map((node) => node.y + NODE_HEIGHT));
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const node of nodes) {
+    minX = Math.min(minX, node.x - NODE_WIDTH / 2);
+    maxX = Math.max(maxX, node.x + NODE_WIDTH / 2);
+    minY = Math.min(minY, node.y);
+    maxY = Math.max(maxY, node.y + NODE_HEIGHT);
+  }
 
   const width = maxX - minX + PADDING * 2;
   const height = maxY - minY + PADDING * 2;
@@ -91,6 +100,8 @@ const layout = computed(() => {
 
   return { width, height, nodes: positioned, links };
 });
+
+const hasLargeVisibleSet = computed(() => layout.value.nodes.length > VISIBLE_NODE_WARNING);
 
 function linkPath(link) {
   // Orthogonal elbow connectors read better than diagonal curves for dense org
@@ -182,6 +193,10 @@ defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
 
 <template>
   <div ref="viewport" class="chart-viewport">
+    <div v-if="hasLargeVisibleSet" class="visible-warning" role="status">
+      {{ formatNumber(layout.nodes.length) }} cards visible. Collapse branches for smoother pan and zoom.
+    </div>
+
     <div
       class="chart-layer"
       :style="{
@@ -227,6 +242,22 @@ defineExpose({ zoomIn, zoomOut, fitToView, centerNode });
   left: 0;
   transform-origin: 0 0;
   will-change: transform;
+}
+
+.visible-warning {
+  position: absolute;
+  z-index: 6;
+  right: 14px;
+  top: 14px;
+  max-width: min(360px, calc(100% - 28px));
+  border: 1px solid color-mix(in oklch, var(--amber) 54%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--amber) 18%, var(--surface-strong));
+  padding: 9px 11px;
+  color: color-mix(in oklch, var(--ink) 78%, var(--amber));
+  font-size: 0.78rem;
+  font-weight: 760;
+  pointer-events: none;
 }
 
 .connector-layer {

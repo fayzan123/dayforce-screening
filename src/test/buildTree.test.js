@@ -55,6 +55,7 @@ describe('buildOrgTree', () => {
       icCost: 35,
       totalCost: 93,
       managerCostShare: 58 / 93,
+      icToManagerCostRatio: 35 / 58,
       managerToIcCostRatio: 58 / 35,
     });
 
@@ -65,6 +66,7 @@ describe('buildOrgTree', () => {
       icCost: 15,
       totalCost: 23,
       managerCostShare: 8 / 23,
+      icToManagerCostRatio: 15 / 8,
       managerToIcCostRatio: 8 / 15,
     });
 
@@ -75,6 +77,7 @@ describe('buildOrgTree', () => {
       icCost: 0,
       totalCost: 0,
       managerCostShare: null,
+      icToManagerCostRatio: null,
       managerToIcCostRatio: null,
     });
 
@@ -109,6 +112,7 @@ describe('buildOrgTree', () => {
     expect(managers).toBe(11453);
     expect(allNodes.length - managers).toBe(28547);
     expect(Math.abs(root.metrics.totalCost - (totalSalary - root.data.salary))).toBeLessThan(0.05);
+    expect(root.metrics.icToManagerCostRatio).toBeCloseTo(root.metrics.icCost / root.metrics.mgmtCost, 10);
 
     for (const node of allNodes) {
       expect(Math.abs(node.metrics.mgmtCost + node.metrics.icCost - node.metrics.totalCost)).toBeLessThan(0.0001);

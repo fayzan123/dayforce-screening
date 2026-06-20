@@ -96,7 +96,7 @@ const departmentTone = {
     </dl>
 
     <footer class="node-footer">
-      <span>Mgmt:IC {{ formatRatio(node.metrics.managerToIcCostRatio) }}</span>
+      <span>IC:Mgmt {{ formatRatio(node.metrics.icToManagerCostRatio) }}</span>
       <strong>{{ formatNumber(node.data.directReportCount) }} direct</strong>
     </footer>
   </article>

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { AlertTriangle, BarChart3, GitBranch } from '@lucide/vue';
 import AnalyticsView from './components/analytics/AnalyticsView.vue';
 import OrgChartView from './components/orgchart/OrgChartView.vue';
@@ -8,6 +8,11 @@ import { formatCurrency, formatNumber } from './lib/format.js';
 
 const store = useOrgTree();
 const activeTab = ref('org');
+
+const summary = computed(() => {
+  if (activeTab.value === 'org') return store.globalSummary.value ?? store.filteredSummary.value;
+  return store.filteredSummary.value ?? store.globalSummary.value;
+});
 
 // Loading at the shell level ensures both tabs share the same parsed hierarchy,
 // rollup metrics, filters, and error state.
@@ -61,24 +66,24 @@ onMounted(() => {
       </section>
 
       <template v-else>
-        <!-- This strip always reflects the current analytics filter state, so it
-          doubles as quick feedback when the bonus dashboard is filtered. -->
+        <!-- The org chart keeps global totals so analytics filters do not make the
+          hierarchy tab look smaller than it is. Analytics keeps filtered totals. -->
         <section class="summary-strip" aria-label="Organization summary">
           <div>
-            <span>Headcount</span>
-            <strong>{{ formatNumber(store.analytics.value.summary.headcount) }}</strong>
+            <span>Headcount <em v-if="activeTab === 'analytics' && store.hasActiveFilters.value">Filtered</em></span>
+            <strong>{{ formatNumber(summary.headcount) }}</strong>
           </div>
           <div>
             <span>Managers</span>
-            <strong>{{ formatNumber(store.analytics.value.summary.managers) }}</strong>
+            <strong>{{ formatNumber(summary.managers) }}</strong>
           </div>
           <div>
             <span>ICs</span>
-            <strong>{{ formatNumber(store.analytics.value.summary.ics) }}</strong>
+            <strong>{{ formatNumber(summary.ics) }}</strong>
           </div>
           <div>
             <span>Salary Base</span>
-            <strong>{{ formatCurrency(store.analytics.value.summary.salary) }}</strong>
+            <strong>{{ formatCurrency(summary.salary) }}</strong>
           </div>
         </section>
 

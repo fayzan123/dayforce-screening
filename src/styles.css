@@ -232,6 +232,17 @@ h1 {
   font-weight: 720;
 }
 
+.summary-strip em {
+  display: inline-flex;
+  margin-left: 5px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  padding: 1px 5px;
+  color: var(--primary-ink);
+  font-style: normal;
+  font-weight: 800;
+}
+
 .summary-strip strong {
   color: var(--ink);
   font-size: 1rem;

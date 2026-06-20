@@ -101,6 +101,21 @@ function spanRows(nodes) {
     .sort((a, b) => a.span - b.span);
 }
 
+function spanByDepartmentRows(nodes, { limit = 10 } = {}) {
+  return rollups(
+    nodes.filter((node) => node.data.isManager),
+    (items) => ({
+      managers: items.length,
+      avgSpan: items.length ? sum(items, (node) => node.data.directReportCount) / items.length : 0,
+      salary: sum(items, (node) => node.data.salary),
+    }),
+    (node) => node.data.department,
+  )
+    .map(([label, summary]) => ({ label, ...summary }))
+    .sort((a, b) => b.avgSpan - a.avgSpan || b.managers - a.managers)
+    .slice(0, limit);
+}
+
 function heatmapRows(nodes) {
   // Limit columns to the top cost departments. Rendering all 20 works, but this
   // keeps the heatmap readable and responsive on narrower screens.
@@ -154,6 +169,20 @@ function stackedCostRows(nodes, mode = 'comp') {
   });
 }
 
+function proportionRows(nodes, mode = 'salary', { limit = 10 } = {}) {
+  const rows = dimensionRows(nodes, 'department', { limit }).map((row) => ({
+    label: row.label,
+    value: mode === 'headcount' ? row.headcount : row.salary,
+    headcount: row.headcount,
+    salary: row.salary,
+  }));
+  const total = Math.max(1, sum(rows, (row) => row.value));
+  return rows.map((row) => ({
+    ...row,
+    share: row.value / total,
+  }));
+}
+
 /**
  * Create a memoized analytics selector bound to the immutable node list.
  *
@@ -168,8 +197,8 @@ export function createAnalyticsMemo(allNodes) {
   const levels = levelRows(allNodes);
   const salaryRange = extent(allNodes, (node) => node.data.salary);
 
-  return function getAnalytics(filters = EMPTY_FILTERS, costMode = 'comp') {
-    const key = `${filterKey(filters)}:${costMode}`;
+  return function getAnalytics(filters = EMPTY_FILTERS, costMode = 'comp', proportionMode = 'salary') {
+    const key = `${filterKey(filters)}:${costMode}:${proportionMode}`;
     if (cache.has(key)) return cache.get(key);
 
     const nodes = allNodes.filter((node) => nodeMatchesFilters(node, filters));
@@ -185,8 +214,10 @@ export function createAnalyticsMemo(allNodes) {
       filteredLocationRows: dimensionRows(nodes, 'location', { limit: 8 }),
       filteredLevelRows: levelRows(nodes),
       spanRows: spanRows(nodes),
+      spanByDepartmentRows: spanByDepartmentRows(nodes),
       heatmap: heatmapRows(nodes),
       stackedCostRows: stackedCostRows(nodes, costMode),
+      proportionRows: proportionRows(nodes, proportionMode),
     };
 
     cache.set(key, analytics);

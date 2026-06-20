@@ -91,8 +91,8 @@ function reset() {
           <dd>{{ formatPercent(store.selectedNode.value.metrics.managerCostShare) }}</dd>
         </div>
         <div>
-          <dt>Mgmt:IC</dt>
-          <dd>{{ formatRatio(store.selectedNode.value.metrics.managerToIcCostRatio) }}</dd>
+          <dt>IC:Mgmt</dt>
+          <dd>{{ formatRatio(store.selectedNode.value.metrics.icToManagerCostRatio) }}</dd>
         </div>
       </dl>
     </aside>

@@ -32,6 +32,7 @@ import { initialsForName } from './format.js';
  * @property {number} icCost Salary sum of descendant individual contributors.
  * @property {number} totalCost Salary sum of all descendants.
  * @property {number | null} managerCostShare mgmtCost / totalCost.
+ * @property {number | null} icToManagerCostRatio icCost / mgmtCost; this is the written brief's "IC to manager" ratio.
  * @property {number | null} managerToIcCostRatio mgmtCost / icCost.
  */
 
@@ -192,9 +193,10 @@ export function buildOrgTree(rawRows) {
     }
 
     const totalCost = mgmtCost + icCost;
-    // Both ratio styles are kept because the written brief and screenshot use
-    // slightly different language. Displaying both avoids ambiguity.
+    // The written brief asks for the ratio between IC and manager cost. Manager
+    // share is kept separately because it is useful and mirrors the screenshot.
     const managerCostShare = totalCost > 0 ? mgmtCost / totalCost : null;
+    const icToManagerCostRatio = mgmtCost > 0 ? icCost / mgmtCost : null;
     const managerToIcCostRatio = icCost > 0 ? mgmtCost / icCost : null;
 
     /** @type {OrgMetrics} */
@@ -205,6 +207,7 @@ export function buildOrgTree(rawRows) {
       icCost,
       totalCost,
       managerCostShare,
+      icToManagerCostRatio,
       managerToIcCostRatio,
     });
   });

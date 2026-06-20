@@ -54,6 +54,11 @@ export function formatRatio(value) {
   return `${ratioNumber.format(value)} : 1`;
 }
 
+export function formatMultiple(value, suffix = 'x') {
+  if (!Number.isFinite(value)) return '-';
+  return `${ratioNumber.format(value)}${suffix}`;
+}
+
 export function initialsForName(name) {
   // The source Photo column points to placeholder ui-avatar URLs, so the app
   // generates deterministic initials instead of displaying broken-looking photos.

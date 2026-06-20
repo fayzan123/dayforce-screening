@@ -34,6 +34,7 @@ function createStore() {
   const highlightedNodeId = ref(null);
   const filters = ref(cloneFilters(EMPTY_FILTERS));
   const costMode = ref('comp');
+  const proportionMode = ref('salary');
   const getAnalytics = shallowRef(null);
 
   const selectedNode = computed(() => {
@@ -43,8 +44,14 @@ function createStore() {
 
   const analytics = computed(() => {
     if (!getAnalytics.value) return null;
-    return getAnalytics.value(filters.value, costMode.value);
+    return getAnalytics.value(filters.value, costMode.value, proportionMode.value);
   });
+
+  const hasActiveFilters = computed(() => Boolean(filters.value.department || filters.value.location || filters.value.level));
+
+  const globalSummary = computed(() => analytics.value?.fullSummary ?? null);
+
+  const filteredSummary = computed(() => analytics.value?.summary ?? null);
 
   async function load() {
     if (loadState.value === 'loaded' || loadState.value === 'loading') return;
@@ -166,6 +173,10 @@ function createStore() {
     costMode.value = mode;
   }
 
+  function setProportionMode(mode) {
+    proportionMode.value = mode;
+  }
+
   function viewFirstMatchingNode() {
     // Analytics filters often match thousands of employees; this chooses the
     // first matching node as a deterministic bridge back into the org chart.
@@ -195,7 +206,11 @@ function createStore() {
     highlightedNodeId,
     filters,
     costMode,
+    proportionMode,
     analytics,
+    hasActiveFilters,
+    globalSummary,
+    filteredSummary,
     load,
     isExpanded,
     toggleNode,
@@ -206,6 +221,7 @@ function createStore() {
     setFilter,
     clearFilters,
     setCostMode,
+    setProportionMode,
     viewFirstMatchingNode,
   };
 }

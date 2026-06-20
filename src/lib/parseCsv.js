@@ -56,7 +56,7 @@ function parseInWorker(csvText) {
  * @param {string} path Public URL for the CSV file.
  * @returns {Promise<Array<Record<string, string>>>}
  */
-export async function loadCsvRows(path = '/data/giga-corp.csv') {
+export async function loadCsvRows(path = `${import.meta.env.BASE_URL}data/giga-corp.csv`) {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Could not load ${path}: ${response.status} ${response.statusText}`);

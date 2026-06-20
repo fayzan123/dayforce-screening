@@ -8,7 +8,7 @@ Interactive org chart visualizer with hierarchy cost analytics for the Dayforce 
 - Vite
 - Tailwind CSS v4
 - PapaParse CSV parsing in an explicit Vite worker
-- d3-hierarchy for `stratify` and post-order metric rollups
+- d3-hierarchy for `stratify`, post-order metric rollups, and the icicle `partition` view
 - d3-zoom for the org chart canvas
 - Vitest for hierarchy correctness tests
 
@@ -42,7 +42,9 @@ The tests validate the hand-checked rollup fixture and real Giga Corp invariants
 - Expand/collapse keeps the full hierarchy intact and only changes a Vue-held `expandedIds` set.
 - The org chart derives a visible-only layout from the immutable tree, so UI interaction does not recompute descendant metrics.
 - Cost metrics use salary only, matching the assessment text. Bonus appears only in the analytics cost-mix chart.
-- The analytics tab provides department, location, and level cross-filtering plus cost, layer, span-of-control, and heatmap views.
+- The assessment ratio is shown as `IC:Mgmt` (`icCost / mgmtCost`), with management share shown separately.
+- The analytics tab provides department, location, and level cross-filtering plus icicle, proportion, cost, layer, span-of-control, and heatmap views.
+- CSV loading uses Vite's `BASE_URL`, so the app works under root and sub-path deployments.
 
 ## Code Walkthrough
 
@@ -51,7 +53,9 @@ The tests validate the hand-checked rollup fixture and real Giga Corp invariants
 - `src/composables/useOrgTree.js` is the app store. It keeps the 40k-node tree out of deep Vue reactivity with `markRaw` and exposes expansion, search, filters, and analytics state.
 - `src/components/orgchart/OrgChartCanvas.vue` creates a visible-only d3 layout from `expandedIds`, then renders SVG connectors and HTML cards in one zoomable coordinate space.
 - `src/lib/analytics.js` builds memoized flat aggregations for the bonus view without recalculating any descendant subtrees.
+- `src/lib/icicle.js` builds the d3 partition row model for the org-shape icicle without mutating the original hierarchy.
 - `src/test/buildTree.test.js` documents the expected metric behavior with a small fixture and verifies the real dataset invariants.
+- `src/test/analytics.test.js` covers proportion rows, span-by-department rows, heatmap mode data, and icicle partition values.
 
 ## Submission
 

@@ -13,6 +13,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['mode']);
+
 const cellsByDepartment = computed(() => {
   const map = new Map();
   for (const department of props.heatmap.departments) map.set(department, []);
@@ -38,8 +40,14 @@ function labelFor(cell) {
 <template>
   <section class="chart-card heatmap-card">
     <header>
-      <h2>Level x Department Heatmap</h2>
-      <p>{{ mode === 'salary' ? 'Salary density' : 'Headcount density' }}</p>
+      <div>
+        <h2>Level x Department Heatmap</h2>
+        <p>{{ mode === 'salary' ? 'Salary density' : 'Headcount density' }}</p>
+      </div>
+      <div class="mode-toggle" aria-label="Heatmap mode">
+        <button type="button" :class="{ active: mode === 'headcount' }" @click="emit('mode', 'headcount')">Headcount</button>
+        <button type="button" :class="{ active: mode === 'salary' }" @click="emit('mode', 'salary')">Cost</button>
+      </div>
     </header>
 
     <div class="heatmap-scroll">
@@ -78,7 +86,7 @@ function labelFor(cell) {
 
 header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
@@ -97,6 +105,32 @@ p {
   color: var(--ink-soft);
   font-size: 0.75rem;
   font-weight: 720;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  padding: 3px;
+}
+
+.mode-toggle button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  padding: 0 10px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 780;
+}
+
+.mode-toggle button.active {
+  background: var(--surface-strong);
+  color: var(--primary-ink);
 }
 
 .heatmap-scroll {
@@ -145,5 +179,12 @@ p {
   background: color-mix(in oklch, var(--blue) calc(var(--alpha) * 86%), var(--surface-muted));
   color: color-mix(in oklch, var(--ink) 86%, var(--primary-ink));
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 620px) {
+  header {
+    align-items: start;
+    flex-direction: column;
+  }
 }
 </style>

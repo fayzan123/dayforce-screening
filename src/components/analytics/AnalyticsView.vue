@@ -1,18 +1,22 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { LocateFixed } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
 import { formatCurrency, formatNumber, formatPercent } from '../../lib/format.js';
 import FilterBar from './FilterBar.vue';
 import HeatmapChart from './HeatmapChart.vue';
 import HorizontalBarChart from './HorizontalBarChart.vue';
+import IcicleChart from './IcicleChart.vue';
 import LevelPyramid from './LevelPyramid.vue';
 import MetricTile from './MetricTile.vue';
+import ProportionChart from './ProportionChart.vue';
+import SpanByDepartmentChart from './SpanByDepartmentChart.vue';
 import SpanHistogram from './SpanHistogram.vue';
 import StackedCostChart from './StackedCostChart.vue';
 
 const emit = defineEmits(['show-org']);
 const store = useOrgTree();
+const heatmapMode = ref('headcount');
 
 const analytics = computed(() => store.analytics.value);
 
@@ -28,6 +32,11 @@ function viewInOrgChart() {
   store.viewFirstMatchingNode();
   emit('show-org');
 }
+
+function viewNodeInOrgChart(node) {
+  store.expandPathTo(node.id);
+  emit('show-org');
+}
 </script>
 
 <template>
@@ -36,6 +45,7 @@ function viewInOrgChart() {
       <div>
         <p class="eyebrow">Cost analytics</p>
         <h2>Where Giga Corp’s organization shape creates cost concentration</h2>
+        <span v-if="store.hasActiveFilters.value" class="filter-badge">Filtered view</span>
       </div>
       <button type="button" @click="viewInOrgChart">
         <LocateFixed :size="18" aria-hidden="true" />
@@ -54,6 +64,15 @@ function viewInOrgChart() {
     </div>
 
     <div class="analytics-grid">
+      <IcicleChart class="wide" :root="store.root.value" @view-node="viewNodeInOrgChart" />
+
+      <ProportionChart
+        :rows="analytics.proportionRows"
+        :mode="store.proportionMode.value"
+        @mode="store.setProportionMode"
+        @select="filter('department', $event.label)"
+      />
+
       <HorizontalBarChart
         title="Department Cost Concentration"
         :rows="analytics.filteredDepartmentRows"
@@ -65,6 +84,8 @@ function viewInOrgChart() {
       <LevelPyramid :rows="analytics.filteredLevelRows" :active-level="store.filters.value.level" @select="filter('level', $event.level)" />
 
       <SpanHistogram :rows="analytics.spanRows" />
+
+      <SpanByDepartmentChart :rows="analytics.spanByDepartmentRows" />
 
       <StackedCostChart
         :rows="analytics.stackedCostRows"
@@ -82,7 +103,7 @@ function viewInOrgChart() {
         @select="filter('location', $event.label)"
       />
 
-      <HeatmapChart class="wide" :heatmap="analytics.heatmap" mode="headcount" />
+      <HeatmapChart class="wide" :heatmap="analytics.heatmap" :mode="heatmapMode" @mode="heatmapMode = $event" />
     </div>
   </section>
 </template>
@@ -110,6 +131,18 @@ function viewInOrgChart() {
   font-weight: 820;
   letter-spacing: 0;
   line-height: 1.02;
+}
+
+.filter-badge {
+  display: inline-flex;
+  margin-top: 8px;
+  border: 1px solid color-mix(in oklch, var(--primary) 38%, var(--line));
+  border-radius: 999px;
+  background: var(--primary-soft);
+  padding: 4px 9px;
+  color: var(--primary-ink);
+  font-size: 0.72rem;
+  font-weight: 790;
 }
 
 .analytics-heading button {
