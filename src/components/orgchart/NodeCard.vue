@@ -49,11 +49,15 @@ const toneVar = computed(() => {
     class="node-card"
     :class="[node.data.isManager ? 'manager' : 'leaf', highlighted ? 'is-highlighted' : '']"
     :style="{ '--tone': toneVar }"
-    tabindex="0"
-    @click="$emit('select', node)"
-    @keydown.enter="$emit('select', node)"
-    @keydown.space.prevent="$emit('select', node)"
   >
+    <button
+      class="nc-select"
+      type="button"
+      :aria-label="`Select ${node.data.name}, ${node.data.title}, ${node.data.department}`"
+      :aria-pressed="highlighted"
+      @click="$emit('select', node)"
+    />
+
     <header class="nc-head">
       <span class="nc-avatar" aria-hidden="true">{{ node.data.initials }}</span>
       <div class="nc-id">
@@ -165,16 +169,30 @@ const toneVar = computed(() => {
   box-shadow: var(--shadow-sm);
 }
 
-.node-card:focus-visible {
+.node-card:focus-within {
   border-color: var(--primary);
   box-shadow: var(--shadow-sm);
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
 }
 
 .node-card.is-highlighted {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-md);
+}
+
+.nc-select {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.nc-select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .node-card.leaf {
@@ -231,9 +249,11 @@ const toneVar = computed(() => {
 }
 
 .nc-toggle {
+  position: relative;
+  z-index: 2;
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-xs);

@@ -14,7 +14,7 @@ The interface follows an **"Org as Architecture"** language — drafting precisi
 
 - **Type & color:** Archivo (display) + Hanken Grotesk (UI) on a paper-tinted, ink-blue OKLCH palette, with ochre reserved for cost emphasis. Tabular figures throughout.
 - **Signature moment:** the organizational silhouette — Giga Corp is dramatically bottom-heavy, so the *shape of the company* becomes the hero graphic in analytics.
-- **Motion:** explicit camera jumps (search, "View in Org Chart", center-selected) pan smoothly via eased d3-zoom transitions; plain selection never moves the camera. All motion respects `prefers-reduced-motion`.
+- **Motion:** explicit camera jumps (search, "View in Org Chart", center-selected) pan smoothly via eased d3-zoom transitions; selecting a visible card gently centers that node. All motion respects `prefers-reduced-motion`.
 - **Dark mode:** full `[data-theme="dark"]` token set with a persistent toggle (defaults to the OS preference).
 - **Accessibility:** WCAG AA contrast (measured), visible keyboard focus, a skip link, and charts that never rely on color alone (legends + density scales).
 
@@ -31,17 +31,24 @@ The interface follows an **"Org as Architecture"** language — drafting precisi
 ## Local Development
 
 ```bash
+nvm use
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. The CSV is served from `public/data/giga-corp.csv`.
+Use Node 22, or any Node version supported by the package engine (`>=20.19.0`). Open the local URL printed by Vite. The CSV is served from `public/data/giga-corp.csv`.
 
 ## Verification
 
 ```bash
 npm run test
 npm run build
+```
+
+For a sub-path static host such as GitHub Pages at `/dayforce-screening/`, use:
+
+```bash
+npm run build:github
 ```
 
 The tests validate the hand-checked rollup fixture and real Giga Corp invariants:
@@ -60,7 +67,7 @@ The tests validate the hand-checked rollup fixture and real Giga Corp invariants
 - Cost metrics use salary only, matching the assessment text. Bonus appears only in the analytics cost-mix chart.
 - The assessment ratio is shown as `IC:Mgmt` (`icCost / mgmtCost`), with management share shown separately.
 - The analytics tab provides department, location, and level cross-filtering plus icicle, proportion, cost, layer, span-of-control, and heatmap views.
-- CSV loading uses Vite's `BASE_URL`, so the app works under root and sub-path deployments.
+- CSV loading uses Vite's `BASE_URL`. Root deployments work with `npm run build`; sub-path deployments should set Vite's base, for example with `npm run build:github` for `/dayforce-screening/`.
 
 ## Code Walkthrough
 

@@ -253,7 +253,7 @@ onBeforeUnmount(() => {
 
 .about-toc a {
   display: block;
-  min-height: 36px;
+  min-height: 44px;
   border-radius: var(--radius-xs);
   padding: var(--space-xs) var(--space-sm);
   color: var(--ink-muted);
@@ -612,7 +612,7 @@ tr:last-child td {
   }
 
   .about-toc a {
-    min-height: 40px;
+    min-height: 44px;
     border: 1px solid var(--line);
     background: var(--surface-strong);
   }

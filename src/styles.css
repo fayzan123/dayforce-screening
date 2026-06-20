@@ -315,8 +315,8 @@ h1 {
 
 .theme-toggle {
   display: inline-grid;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -549,7 +549,7 @@ h1 {
 
 .status-action {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   gap: var(--space-xs);
   margin-top: var(--space-lg);
@@ -634,7 +634,7 @@ h1 {
   }
 
   .theme-toggle {
-    flex: 0 0 38px;
+    flex: 0 0 44px;
   }
 
   .main-surface {

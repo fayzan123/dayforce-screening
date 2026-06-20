@@ -135,7 +135,7 @@ function submitSearch() {
 .search-box input {
   min-width: 0;
   width: 100%;
-  height: 38px;
+  height: 44px;
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -149,8 +149,8 @@ function submitSearch() {
 .search-box > button,
 .control-group button {
   display: inline-flex;
-  min-width: 38px;
-  height: 38px;
+  min-width: 44px;
+  height: 44px;
   align-items: center;
   justify-content: center;
   gap: 7px;
@@ -164,8 +164,8 @@ function submitSearch() {
 }
 
 .search-box > button {
-  min-width: 28px;
-  height: 28px;
+  min-width: 44px;
+  height: 44px;
   border: 0;
 }
 
@@ -204,6 +204,7 @@ function submitSearch() {
   width: 100%;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
+  min-height: 44px;
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;

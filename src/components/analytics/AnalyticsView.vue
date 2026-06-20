@@ -191,7 +191,7 @@ function viewNodeInOrgChart(node) {
 
 .analytics-heading button {
   display: inline-flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -249,7 +249,7 @@ function viewNodeInOrgChart(node) {
 
 .filtered-empty button {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   margin-top: var(--space-lg);
   border: 1px solid color-mix(in oklch, var(--primary) 50%, var(--line));

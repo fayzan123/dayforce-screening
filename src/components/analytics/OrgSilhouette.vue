@@ -129,6 +129,7 @@ const model = computed(() => {
   grid-template-columns: 34px minmax(0, 1fr) 168px;
   align-items: center;
   gap: var(--space-md);
+  min-height: 44px;
   border: 0;
   border-radius: var(--radius-xs);
   background: transparent;

@@ -203,7 +203,7 @@ p {
 
 .insight-actions button {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 7px;

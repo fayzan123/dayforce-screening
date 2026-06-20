@@ -4,12 +4,16 @@
   "description": "Interactive org chart visualizer with hierarchy cost analytics. Vue 3, Tailwind, d3-hierarchy",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "directories": {
     "doc": "docs"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:github": "vite build --base=/dayforce-screening/",
     "preview": "vite preview",
     "test": "vitest run"
   },

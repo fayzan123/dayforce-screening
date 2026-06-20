@@ -102,7 +102,7 @@ p {
   grid-template-columns: minmax(120px, 0.8fr) minmax(120px, 1.4fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;

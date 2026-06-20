@@ -31,12 +31,27 @@ function focus(node) {
   if (node.hasChildren) focusId.value = node.id;
 }
 
+function focusWithKeyboard(event, node) {
+  if (!node.hasChildren) return;
+  event.preventDefault();
+  focus(node);
+}
+
 function goUp() {
   if (focusNode.value.parent) focusId.value = focusNode.value.parent.id;
 }
 
 function formatValue(value) {
   return mode.value === 'headcount' ? formatNumber(value) : formatCurrency(value);
+}
+
+function nodeLabel(node) {
+  const name = node.source.data.name;
+  const value = formatValue(node.value);
+  const share = formatPercent(node.share);
+  return node.hasChildren
+    ? `Focus ${name}, ${value}, ${share} of parent`
+    : `${name}, ${value}, ${share} of parent`;
 }
 </script>
 
@@ -79,7 +94,12 @@ function formatValue(value) {
             :width="Math.max(0, node.x1 - node.x0 - 2)"
             :height="Math.max(0, node.y1 - node.y0)"
             rx="4"
+            :role="node.hasChildren ? 'button' : undefined"
+            :tabindex="node.hasChildren ? 0 : undefined"
+            :aria-label="nodeLabel(node)"
             @click="focus(node)"
+            @keydown.enter="focusWithKeyboard($event, node)"
+            @keydown.space="focusWithKeyboard($event, node)"
           />
           <text v-if="node.x1 - node.x0 > 74" :x="node.x0 + 8" :y="node.y0 + 17">
             {{ node.source.data.name }}
@@ -138,7 +158,7 @@ p {
 .header-actions > button,
 .mode-toggle button {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -167,7 +187,6 @@ p {
 }
 
 .mode-toggle button {
-  min-height: 28px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -200,6 +219,11 @@ rect.clickable {
 
 rect.clickable:hover {
   filter: brightness(0.97);
+}
+
+rect.clickable:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Ink-blue strata: each level a lighter band of the same hue, like a section cut. */

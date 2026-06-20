@@ -125,7 +125,7 @@ const activeCount = computed(
 .filter-group button,
 .clear-button {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -153,7 +153,7 @@ const activeCount = computed(
 }
 
 .levels button {
-  min-width: 38px;
+  min-width: 44px;
   padding: 0 8px;
   font-variant-numeric: tabular-nums;
 }

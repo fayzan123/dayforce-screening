@@ -110,7 +110,7 @@ p {
 }
 
 .mode-toggle button {
-  min-height: 30px;
+  min-height: 44px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -160,7 +160,7 @@ p {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
