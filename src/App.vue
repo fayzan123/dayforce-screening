@@ -87,8 +87,10 @@ onMounted(() => {
           </div>
         </section>
 
-        <OrgChartView v-if="activeTab === 'org'" />
-        <AnalyticsView v-else @show-org="activeTab = 'org'" />
+        <Transition name="view-fade" mode="out-in">
+          <OrgChartView v-if="activeTab === 'org'" key="org" />
+          <AnalyticsView v-else key="analytics" @show-org="activeTab = 'org'" />
+        </Transition>
       </template>
     </main>
   </div>

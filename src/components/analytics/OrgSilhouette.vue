@@ -52,10 +52,11 @@ const model = computed(() => {
 
     <div class="sil-stack" role="list">
       <button
-        v-for="band in model.bands"
+        v-for="(band, index) in model.bands"
         :key="band.level"
         class="sil-band"
         :class="{ active: activeLevel === band.level, widest: band.level === model.widestLevel }"
+        :style="{ '--i': index }"
         type="button"
         role="listitem"
         :aria-label="`Level ${band.level}: ${formatNumber(band.headcount)} people, ${formatCurrency(band.salary)}`"
@@ -67,15 +68,13 @@ const model = computed(() => {
             class="sil-bar"
             :style="{
               width: `${band.width}%`,
-              background: `color-mix(in oklch, var(--primary) ${88 - band.depth * 52}%, var(--surface-strong))`,
+              background: `color-mix(in oklch, var(--primary) ${86 - band.depth * 46}%, var(--surface-strong))`,
             }"
-          >
-            <span class="sil-inbar tnum">{{ formatNumber(band.headcount) }}</span>
-          </span>
+          />
         </span>
         <span class="sil-readout">
-          <span class="tnum">{{ formatPercent(band.share) }}</span>
-          <span class="sil-cost tnum">{{ formatCurrency(band.salary) }}</span>
+          <span class="sil-count tnum">{{ formatNumber(band.headcount) }}</span>
+          <span class="sil-sub tnum">{{ formatPercent(band.share) }} · {{ formatCurrency(band.salary) }}</span>
         </span>
       </button>
     </div>
@@ -127,7 +126,7 @@ const model = computed(() => {
 
 .sil-band {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 132px;
+  grid-template-columns: 34px minmax(0, 1fr) 168px;
   align-items: center;
   gap: var(--space-md);
   border: 0;
@@ -172,7 +171,21 @@ const model = computed(() => {
   height: 26px;
   border-radius: 2px;
   padding-right: 8px;
+  transform-origin: center;
   transition: filter 150ms var(--ease-out);
+  animation: sil-grow 640ms var(--ease-out-quint) backwards;
+  animation-delay: calc(var(--i, 0) * 48ms);
+}
+
+@keyframes sil-grow {
+  from {
+    transform: scaleX(0.04);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
 .sil-band:hover .sil-bar {
@@ -183,26 +196,27 @@ const model = computed(() => {
   box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 60%, transparent);
 }
 
-.sil-inbar {
-  color: var(--surface-strong);
-  font-size: var(--fs-xs);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-
 .sil-readout {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  color: var(--ink);
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  line-height: 1.1;
 }
 
-.sil-cost {
+.sil-count {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sil-sub {
   color: var(--ink-muted);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 

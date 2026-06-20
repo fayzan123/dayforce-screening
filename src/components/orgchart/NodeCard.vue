@@ -134,7 +134,17 @@ const toneVar = computed(() => {
   box-shadow: var(--shadow-xs);
   cursor: pointer;
   transform: translateZ(0);
-  transition: border-color 180ms var(--ease-out), box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out);
+  transition: border-color 180ms var(--ease-out), box-shadow 200ms var(--ease-out), transform 260ms var(--ease-out-quint);
+  animation: card-in 300ms var(--ease-out) backwards;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .node-card:hover,

@@ -194,6 +194,17 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
+/* Tab view crossfade (applied to child component roots, so kept global). */
+.view-fade-enter-active,
+.view-fade-leave-active {
+  transition: opacity 200ms var(--ease-out);
+}
+
+.view-fade-enter-from,
+.view-fade-leave-to {
+  opacity: 0;
+}
+
 /* ============================================================================
    App frame — a tool surface presented like a drawing sheet
    ========================================================================= */

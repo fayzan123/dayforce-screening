@@ -164,12 +164,12 @@ function reset() {
 
 .inspector-meta span {
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   background: var(--surface-muted);
   padding: 4px 8px;
   color: var(--ink-muted);
   font-size: 0.72rem;
-  font-weight: 730;
+  font-weight: 650;
 }
 
 .inspector-grid {
@@ -199,8 +199,11 @@ function reset() {
   gap: 5px;
   margin-bottom: 3px;
   color: var(--ink-soft);
-  font-size: 0.7rem;
-  font-weight: 780;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .inspector-grid dd {
