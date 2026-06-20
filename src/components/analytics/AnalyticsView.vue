@@ -177,7 +177,7 @@ function viewNodeInOrgChart(node) {
   border-radius: 7px;
   background: var(--primary);
   padding: 0 13px;
-  color: var(--surface-strong);
+  color: var(--on-primary);
   cursor: pointer;
   font-size: 0.84rem;
   font-weight: 760;
@@ -234,7 +234,7 @@ function viewNodeInOrgChart(node) {
   border-radius: var(--radius-sm);
   background: var(--primary);
   padding: 0 var(--space-md);
-  color: var(--surface-strong);
+  color: var(--on-primary);
   cursor: pointer;
   font-size: var(--fs-sm);
   font-weight: 760;

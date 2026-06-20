@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { AlertTriangle, BarChart3, GitBranch, RotateCcw } from '@lucide/vue';
+import { AlertTriangle, BarChart3, GitBranch, Moon, RotateCcw, Sun } from '@lucide/vue';
 import AnalyticsView from './components/analytics/AnalyticsView.vue';
 import OrgChartView from './components/orgchart/OrgChartView.vue';
 import { useOrgTree } from './composables/useOrgTree.js';
@@ -14,9 +14,24 @@ const summary = computed(() => {
   return store.filteredSummary.value ?? store.globalSummary.value;
 });
 
+// Theme. An inline script in index.html sets data-theme before paint to avoid a
+// flash; this ref just mirrors that so the toggle icon and persistence stay in sync.
+const theme = ref('light');
+
+function applyTheme(next) {
+  document.documentElement.setAttribute('data-theme', next);
+}
+
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark';
+  applyTheme(theme.value);
+  localStorage.setItem('theme', theme.value);
+}
+
 // Loading at the shell level ensures both tabs share the same parsed hierarchy,
 // rollup metrics, filters, and error state.
 onMounted(() => {
+  theme.value = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   store.load();
 });
 </script>
@@ -34,16 +49,27 @@ onMounted(() => {
         </div>
       </div>
 
-      <nav class="tab-nav" aria-label="Primary views">
-        <button :class="{ active: activeTab === 'org' }" type="button" @click="activeTab = 'org'">
-          <GitBranch :size="18" aria-hidden="true" />
-          <span>Org Chart</span>
+      <div class="topbar-end">
+        <nav class="tab-nav" aria-label="Primary views">
+          <button :class="{ active: activeTab === 'org' }" type="button" @click="activeTab = 'org'">
+            <GitBranch :size="18" aria-hidden="true" />
+            <span>Org Chart</span>
+          </button>
+          <button :class="{ active: activeTab === 'analytics' }" type="button" @click="activeTab = 'analytics'">
+            <BarChart3 :size="18" aria-hidden="true" />
+            <span>Cost Analytics</span>
+          </button>
+        </nav>
+        <button
+          class="theme-toggle"
+          type="button"
+          :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+          @click="toggleTheme"
+        >
+          <Sun v-if="theme === 'dark'" :size="18" aria-hidden="true" />
+          <Moon v-else :size="18" aria-hidden="true" />
         </button>
-        <button :class="{ active: activeTab === 'analytics' }" type="button" @click="activeTab = 'analytics'">
-          <BarChart3 :size="18" aria-hidden="true" />
-          <span>Cost Analytics</span>
-        </button>
-      </nav>
+      </div>
     </header>
 
     <main id="main-content" class="main-surface">

@@ -166,7 +166,7 @@ p {
   display: grid;
   place-items: center;
   background: var(--surface-muted);
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .dept-label {
