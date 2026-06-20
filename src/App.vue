@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { AlertTriangle, BarChart3, GitBranch } from '@lucide/vue';
+import { AlertTriangle, BarChart3, GitBranch, RotateCcw } from '@lucide/vue';
 import AnalyticsView from './components/analytics/AnalyticsView.vue';
 import OrgChartView from './components/orgchart/OrgChartView.vue';
 import { useOrgTree } from './composables/useOrgTree.js';
@@ -57,11 +57,18 @@ onMounted(() => {
       </section>
 
       <section v-else-if="store.loadState.value === 'error'" class="error-state" role="alert">
-        <AlertTriangle :size="28" aria-hidden="true" />
-        <div>
+        <div class="status-card">
+          <span class="status-icon" aria-hidden="true"><AlertTriangle :size="22" /></span>
           <p class="eyebrow">Data load failed</p>
           <h2>{{ store.error.value?.message }}</h2>
-          <p>Check that <code>public/data/giga-corp.csv</code> exists and that the CSV headers match the assessment data.</p>
+          <p>
+            Check that <code>public/data/giga-corp.csv</code> exists and that the CSV headers match the
+            assessment data.
+          </p>
+          <button type="button" class="status-action" @click="store.load()">
+            <RotateCcw :size="16" aria-hidden="true" />
+            Try again
+          </button>
         </div>
       </section>
 

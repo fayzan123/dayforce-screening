@@ -403,13 +403,11 @@ h1 {
   padding: var(--space-xl);
 }
 
-.loading-state > div:last-child,
-.error-state > div {
+.loading-state > div:last-child {
   max-width: 60ch;
 }
 
-.loading-state h2,
-.error-state h2 {
+.loading-state h2 {
   margin-bottom: var(--space-xs);
   font-family: var(--font-display);
   font-size: var(--fs-xl);
@@ -417,8 +415,7 @@ h1 {
   letter-spacing: -0.02em;
 }
 
-.loading-state p,
-.error-state p {
+.loading-state p {
   margin-bottom: 0;
   max-width: 52ch;
   color: var(--ink-muted);
@@ -443,8 +440,77 @@ h1 {
   animation: rail-load 1300ms var(--ease-out) infinite;
 }
 
-.error-state {
+/* Error — a measured drafting card. Red appears only as a status accent, never
+   as the body text color. */
+.status-card {
+  max-width: 46ch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.status-icon {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  margin-bottom: var(--space-md);
+  border: 1px solid color-mix(in oklch, var(--danger) 38%, var(--line));
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
   color: var(--danger);
+}
+
+.status-card h2 {
+  margin-bottom: var(--space-xs);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.status-card p {
+  margin-bottom: 0;
+  max-width: 46ch;
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+
+.status-card code {
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+  padding: 1px 5px;
+  font-size: 0.92em;
+}
+
+.status-action {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-lg);
+  border: 1px solid color-mix(in oklch, var(--primary) 50%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  padding: 0 var(--space-md);
+  color: var(--surface-strong);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 760;
+  transition: background 140ms var(--ease-out);
+}
+
+.status-action:hover {
+  background: color-mix(in oklch, var(--primary) 88%, var(--ink));
+}
+
+.status-action:focus-visible {
+  outline: 2px solid var(--primary-line);
+  outline-offset: 2px;
 }
 
 @keyframes rail-load {

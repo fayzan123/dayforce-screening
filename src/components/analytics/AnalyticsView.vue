@@ -20,6 +20,15 @@ const heatmapMode = ref('headcount');
 
 const analytics = computed(() => store.analytics.value);
 
+// A department + location (or level) combination can match nobody. Rather than
+// render a grid of empty charts, show one clear recovery state.
+const isEmpty = computed(() => Boolean(analytics.value) && analytics.value.summary.headcount === 0);
+
+const activeFilterSummary = computed(() => {
+  const f = store.filters.value;
+  return [f.department, f.location, f.level ? `Level ${f.level}` : null].filter(Boolean).join(' · ');
+});
+
 function filter(key, value) {
   // Filters toggle off when the user clicks the active chip/bar again. That
   // keeps cross-filtering discoverable without extra reset controls per chart.
@@ -47,7 +56,7 @@ function viewNodeInOrgChart(node) {
         <h2>Where Giga Corp’s organization shape creates cost concentration</h2>
         <span v-if="store.hasActiveFilters.value" class="filter-badge">Filtered view</span>
       </div>
-      <button type="button" @click="viewInOrgChart">
+      <button type="button" :disabled="isEmpty" @click="viewInOrgChart">
         <LocateFixed :size="18" aria-hidden="true" />
         View Match in Org Chart
       </button>
@@ -55,6 +64,14 @@ function viewNodeInOrgChart(node) {
 
     <FilterBar :analytics="analytics" :filters="store.filters.value" @filter="filter" @clear="store.clearFilters" />
 
+    <div v-if="isEmpty" class="filtered-empty">
+      <p class="eyebrow">No matches</p>
+      <h3>No employees fit this filter combination</h3>
+      <p><strong>{{ activeFilterSummary }}</strong> returns zero people. Remove a filter to widen the view.</p>
+      <button type="button" @click="store.clearFilters">Clear all filters</button>
+    </div>
+
+    <template v-else>
     <div class="metric-grid">
       <MetricTile label="Filtered headcount" :value="formatNumber(analytics.summary.headcount)" note="Rows matching current filters" />
       <MetricTile label="Salary base" :value="formatCurrency(analytics.summary.salary)" note="Salary only, assessment metric source" />
@@ -109,6 +126,7 @@ function viewNodeInOrgChart(node) {
 
       <HeatmapChart class="wide" :heatmap="analytics.heatmap" :mode="heatmapMode" @mode="heatmapMode = $event" />
     </div>
+    </template>
   </section>
 </template>
 
@@ -166,7 +184,64 @@ function viewNodeInOrgChart(node) {
   white-space: nowrap;
 }
 
-.analytics-heading button:hover {
+.analytics-heading button:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--primary) 88%, var(--ink));
+}
+
+.analytics-heading button:disabled {
+  border-color: var(--line);
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+.filtered-empty {
+  margin-top: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  padding: var(--space-2xl) var(--space-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.filtered-empty h3 {
+  margin: 0 0 var(--space-xs);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 760;
+  letter-spacing: -0.01em;
+}
+
+.filtered-empty p {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+
+.filtered-empty strong {
+  color: var(--ink);
+  font-weight: 760;
+}
+
+.filtered-empty button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  margin-top: var(--space-lg);
+  border: 1px solid color-mix(in oklch, var(--primary) 50%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  padding: 0 var(--space-md);
+  color: var(--surface-strong);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: 760;
+  transition: background 140ms var(--ease-out);
+}
+
+.filtered-empty button:hover {
   background: color-mix(in oklch, var(--primary) 88%, var(--ink));
 }
 
