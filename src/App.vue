@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { AlertTriangle, BarChart3, GitBranch, Moon, RotateCcw, Sun } from '@lucide/vue';
+import { AlertTriangle, BarChart3, BookOpen, GitBranch, Moon, RotateCcw, Sun } from '@lucide/vue';
+import AboutView from './components/about/AboutView.vue';
 import AnalyticsView from './components/analytics/AnalyticsView.vue';
 import OrgChartView from './components/orgchart/OrgChartView.vue';
 import { useOrgTree } from './composables/useOrgTree.js';
@@ -8,10 +9,11 @@ import { formatCurrency, formatNumber } from './lib/format.js';
 
 const store = useOrgTree();
 const activeTab = ref('org');
+const EMPTY_SUMMARY = Object.freeze({ headcount: 0, managers: 0, ics: 0, salary: 0 });
 
 const summary = computed(() => {
-  if (activeTab.value === 'org') return store.globalSummary.value ?? store.filteredSummary.value;
-  return store.filteredSummary.value ?? store.globalSummary.value;
+  if (activeTab.value === 'org') return store.globalSummary.value ?? store.filteredSummary.value ?? EMPTY_SUMMARY;
+  return store.filteredSummary.value ?? store.globalSummary.value ?? EMPTY_SUMMARY;
 });
 
 // Theme. An inline script in index.html sets data-theme before paint to avoid a
@@ -59,6 +61,10 @@ onMounted(() => {
             <BarChart3 :size="18" aria-hidden="true" />
             <span>Cost Analytics</span>
           </button>
+          <button :class="{ active: activeTab === 'about' }" type="button" @click="activeTab = 'about'">
+            <BookOpen :size="18" aria-hidden="true" />
+            <span>How it works</span>
+          </button>
         </nav>
         <button
           class="theme-toggle"
@@ -73,7 +79,10 @@ onMounted(() => {
     </header>
 
     <main id="main-content" class="main-surface">
-      <section v-if="store.loadState.value === 'loading' || store.loadState.value === 'idle'" class="loading-state">
+      <Transition name="view-fade" mode="out-in">
+      <AboutView v-if="activeTab === 'about'" key="about" />
+
+      <section v-else-if="store.loadState.value === 'loading' || store.loadState.value === 'idle'" key="loading" class="loading-state">
         <div class="loading-rail" aria-hidden="true">
           <span />
         </div>
@@ -84,7 +93,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <section v-else-if="store.loadState.value === 'error'" class="error-state" role="alert">
+      <section v-else-if="store.loadState.value === 'error'" key="error" class="error-state" role="alert">
         <div class="status-card">
           <span class="status-icon" aria-hidden="true"><AlertTriangle :size="22" /></span>
           <p class="eyebrow">Data load failed</p>
@@ -100,7 +109,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <template v-else>
+      <div v-else key="loaded" class="loaded-view">
         <!-- The org chart keeps global totals so analytics filters do not make the
           hierarchy tab look smaller than it is. Analytics keeps filtered totals. -->
         <section class="summary-strip" aria-label="Organization summary">
@@ -126,7 +135,8 @@ onMounted(() => {
           <OrgChartView v-if="activeTab === 'org'" key="org" />
           <AnalyticsView v-else key="analytics" @show-org="activeTab = 'org'" />
         </Transition>
-      </template>
+      </div>
+      </Transition>
     </main>
   </div>
 </template>

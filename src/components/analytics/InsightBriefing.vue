@@ -118,10 +118,7 @@ function toggleChart(insight) {
   min-width: 0;
   border-top: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line-strong);
-  background:
-    linear-gradient(90deg, color-mix(in oklch, var(--line) 54%, transparent) 1px, transparent 1px),
-    var(--surface-strong);
-  background-size: 28px 28px;
+  background: var(--surface-strong);
   padding: var(--space-lg) var(--space-xl);
 }
 

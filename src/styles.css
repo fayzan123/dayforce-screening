@@ -384,6 +384,12 @@ h1 {
   background: var(--surface);
 }
 
+.loaded-view {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
 /* ============================================================================
    Summary strip — a measured readout docked top-left of the working area
    ========================================================================= */
@@ -600,14 +606,35 @@ h1 {
     border-bottom: 1px solid var(--line);
   }
 
-  .tab-nav {
+  .topbar-end {
     width: 100%;
-    padding: var(--space-2xs) var(--space-xs) var(--space-xs);
+    align-items: center;
+    padding: 0 var(--space-xs) var(--space-xs);
+  }
+
+  .tab-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    padding: var(--space-2xs) 0 0;
   }
 
   .tab-nav button {
     flex: 1 1 0;
+    min-width: 0;
     justify-content: center;
+    gap: var(--space-2xs);
+    padding: 0 var(--space-xs);
+  }
+
+  .tab-nav button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .theme-toggle {
+    flex: 0 0 38px;
   }
 
   .main-surface {
