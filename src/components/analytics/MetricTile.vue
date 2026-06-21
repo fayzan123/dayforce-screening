@@ -1,4 +1,6 @@
 <script setup>
+// Presentational tile for a single headline metric: a label, a large tabular
+// value, and an optional supporting note. Pure display, no logic.
 defineProps({
   label: {
     type: String,

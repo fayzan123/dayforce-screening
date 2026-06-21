@@ -1,4 +1,7 @@
 <script setup>
+// Controls bar above the org canvas: full-tree search with a results dropdown,
+// plus zoom / fit / center / collapse / reset. All actions are emitted to the
+// parent (OrgChartView), which drives the store and the canvas.
 import { computed, ref } from 'vue';
 import { ChevronsDownUp, LocateFixed, Maximize2, RotateCcw, Search, X, ZoomIn, ZoomOut } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
@@ -43,6 +46,8 @@ function submitSearch() {
       </button>
 
       <div v-if="query && (focused || results.length)" class="search-results">
+        <!-- mousedown.prevent fires the choice before the input's blur closes
+          this dropdown, which a plain click would otherwise race against. -->
         <button v-for="node in results" :key="node.id" type="button" @mousedown.prevent="choose(node)">
           <span>
             <strong>{{ node.data.name }}</strong>

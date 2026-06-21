@@ -1,4 +1,8 @@
 <script setup>
+// Renders one derived insight (see lib/insights.js): headline, detail, an
+// evidence proof (either a two-bar share comparison or a single labelled value),
+// and up to two actions — open the supporting chart and locate it in the org
+// chart. Emits intent only; the parent owns chart toggling and navigation.
 import { BarChart3, LocateFixed } from '@lucide/vue';
 import { formatPercent } from '../../lib/format.js';
 
@@ -23,6 +27,7 @@ defineProps({
 
 defineEmits(['toggle-chart', 'find']);
 
+// Human-readable names for the insight `category` codes used in lib/insights.js.
 const categoryLabels = {
   shape: 'Org shape',
   department: 'Department cost',

@@ -1,4 +1,6 @@
 <script setup>
+// Bars ranking departments by their average span of control (mean direct reports
+// per manager). Read-only — there is no useful cross-filter on an average.
 import { computed } from 'vue';
 import { formatCurrency, formatNumber } from '../../lib/format.js';
 
@@ -9,6 +11,7 @@ const props = defineProps({
   },
 });
 
+// Scale bars against the widest span; floor at 1 to avoid divide-by-zero.
 const maxSpan = computed(() => Math.max(1, ...props.rows.map((row) => row.avgSpan)));
 </script>
 

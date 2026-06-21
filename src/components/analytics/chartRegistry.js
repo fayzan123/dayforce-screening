@@ -10,6 +10,25 @@ import StackedCostChart from './StackedCostChart.vue';
 
 const insightChartIds = new Set(INSIGHT_CHART_IDS);
 
+/**
+ * Single source of truth for the analytics charts. AnalyticsView renders this
+ * list rather than hard-coding each chart, so adding or reordering a chart is a
+ * one-entry change here.
+ *
+ * Each entry is:
+ * - `id`            stable key, also what insight links target (see insights.js)
+ * - `title`         heading shown above the chart
+ * - `placement`     'lead' for the hero silhouette, 'explore' for the grid below
+ * - `className`     optional layout hint, e.g. 'wide' to span two columns
+ * - `supportsInsight` true when an insight can deep-link to this chart, kept in
+ *                   sync with INSIGHT_CHART_IDS so the wiring can't drift
+ * - `component`     the chart component
+ * - `props`         reactive props (filtered rows + current control state)
+ * - `listeners`     event handlers, mostly cross-filtering back into the store
+ *
+ * Receives the already-computed analytics slice and store so this stays pure
+ * config with no data logic of its own.
+ */
 export function createAnalyticsChartRegistry({ analytics, store, root, heatmapMode, setHeatmapMode, filter, viewNodeInOrgChart }) {
   return [
     {

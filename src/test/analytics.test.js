@@ -1,8 +1,14 @@
+// Covers the analytics rollups (lib/analytics.js) and the icicle partition
+// (lib/icicle.js): filtered summaries, per-dimension rows, and cost/headcount
+// aggregation. Uses a six-person tree small enough to assert exact numbers by hand.
 import { describe, expect, it } from 'vitest';
 import { createAnalyticsMemo, EMPTY_FILTERS } from '../lib/analytics.js';
 import { buildOrgTree } from '../lib/buildTree.js';
 import { buildIciclePartition } from '../lib/icicle.js';
 
+// Rows mirror the source CSV column names so the fixture runs the same
+// normalization path as the real data. Args: id, manager, name, title, salary,
+// bonus, level, department.
 const fixture = [
   row('a', '', 'A Root', 'CEO', 100, 10, 1, 'Engineering'),
   row('b', 'a', 'B Manager', 'VP', 50, 5, 2, 'Engineering'),

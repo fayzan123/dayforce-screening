@@ -1,5 +1,20 @@
 import { formatCurrency, formatNumber, formatPercent, slugKey } from './format.js';
 
+/**
+ * Insight generation for the analytics "briefing". Each `detect*` function reads
+ * the already-computed analytics slice and proposes zero or more candidate
+ * insights; `deriveInsights` then filters, ranks, and diversifies them into the
+ * short list the UI shows.
+ *
+ * Design rules that the whole pipeline upholds:
+ * - Every insight must make a *quantified* claim (a number in the headline) and
+ *   link to a chart the user can open, so nothing is hand-wavy or a dead end.
+ * - Insights are derived from the same filtered rows the charts render, so the
+ *   evidence always matches what the user sees after clicking through.
+ */
+
+// Charts an insight is allowed to link to. Frozen so a typo in a `detect*`
+// function fails the `isRenderable` gate instead of producing a broken link.
 export const INSIGHT_CHART_IDS = Object.freeze([
   'department-cost',
   'location-cost',
@@ -9,12 +24,19 @@ export const INSIGHT_CHART_IDS = Object.freeze([
 ]);
 
 const VALID_CHART_IDS = new Set(INSIGHT_CHART_IDS);
+
+// The briefing stays scannable: at most four insights total, and at most two
+// from any one category so a single dominant department can't crowd it out.
 const MAX_INSIGHTS = 4;
 const MAX_PER_CATEGORY = 2;
-const MIN_SHARE_GAP = 0.005;
-const DOMINANT_LAYER_MIN_SHARE = 0.2;
-const THIN_SPAN_MIN_SHARE = 0.08;
-const SINGLE_REPORT_MIN_SHARE = 0.02;
+
+// Detection thresholds, all expressed as shares (0..1) of the current slice.
+// They are deliberately low bars: the goal is to surface anything genuinely
+// notable, and ranking/diversification below trims the noise.
+const MIN_SHARE_GAP = 0.005; // min cost-vs-headcount gap (0.5 pts) to flag concentration
+const DOMINANT_LAYER_MIN_SHARE = 0.2; // a reporting layer holding >=20% of people is "dominant"
+const THIN_SPAN_MIN_SHARE = 0.08; // >=8% of managers with <=2 reports is a thin-span layer
+const SINGLE_REPORT_MIN_SHARE = 0.02; // >=2% of managers with exactly one report is notable
 
 function clamp01(value) {
   if (!Number.isFinite(value)) return 0;
@@ -33,6 +55,9 @@ function hasQuantifiedClaim(headline) {
   return /\d/.test(headline);
 }
 
+// An insight is only shown if it makes a quantified claim and can hand the user
+// off to a real chart. Anything missing a headline, a number, evidence, or a
+// valid chart link is dropped rather than rendered half-formed.
 function isRenderable(insight) {
   return Boolean(
     insight?.headline &&
@@ -53,6 +78,11 @@ function shareEvidence(row, summary) {
   };
 }
 
+// Shared shape for "this group costs more than its headcount implies" insights
+// (departments and locations use it identically). The signal is the gap between
+// salary share and headcount share: a positive gap means the group is
+// disproportionately expensive. Severity scales the gap against 2 pts, the point
+// at which concentration is clearly worth a second look.
 function concentrationInsight(row, summary, { category, chart, entityKey, labelPrefix }) {
   const headcountShare = share(row.headcount, summary.headcount);
   const costShare = share(row.salary, summary.salary);
@@ -73,6 +103,8 @@ function concentrationInsight(row, summary, { category, chart, entityKey, labelP
   };
 }
 
+// "The org is bottom-heavy": flags the single reporting layer that holds the
+// largest share of people, when that share clears the dominance threshold.
 function detectDominantLayer(analytics) {
   const rows = analytics.filteredLevelRows ?? [];
   const summary = analytics.summary;
@@ -128,6 +160,9 @@ function detectLocationConcentration(analytics) {
     .filter(Boolean);
 }
 
+// How much of the slice's salary sits with managers, relative to how many
+// people they are. Always emitted (when data exists) because management share is
+// the headline framing of the whole dashboard; severity nudges up with the gap.
 function detectManagementComposition(analytics) {
   const summary = analytics.summary;
   if (!summary?.headcount || !summary.managers || !Number.isFinite(summary.managerCostShare)) return [];
@@ -157,6 +192,9 @@ function detectManagementComposition(analytics) {
   ];
 }
 
+// Thin spans of control (managers with one or two reports) often signal an
+// over-layered org. Prefer the sharper "exactly one report" story when it clears
+// its own threshold, otherwise fall back to the broader "one or two" framing.
 function detectThinSpan(analytics) {
   const summary = analytics.summary;
   if (!summary?.managers) return [];
@@ -197,6 +235,9 @@ function detectThinSpan(analytics) {
   ];
 }
 
+// Walk the already-severity-sorted candidates and take the strongest few while
+// capping each category, so the briefing reads as a varied summary rather than
+// four variations on the same finding. Assumes `insights` is pre-sorted.
 function diversify(insights) {
   const categoryCounts = new Map();
   const selected = [];
@@ -212,6 +253,15 @@ function diversify(insights) {
   return selected;
 }
 
+/**
+ * Build the ranked, deduplicated insight briefing for an analytics slice.
+ *
+ * Pipeline: run every detector, drop anything not renderable, sort by severity
+ * (strongest first), then diversify down to at most {@link MAX_INSIGHTS}.
+ *
+ * @param {object} analytics Computed analytics slice (summary + filtered rows).
+ * @returns {Array<object>} Up to four ready-to-render insight objects.
+ */
 export function deriveInsights(analytics) {
   if (!analytics?.summary?.headcount) return [];
 

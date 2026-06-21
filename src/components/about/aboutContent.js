@@ -1,3 +1,7 @@
+// Content model for the "How it works" page (AboutView.vue). Keeping the copy as
+// plain data here keeps the view a thin renderer and makes the prose easy to edit
+// without touching markup. `pageSections` ids must match the section anchors in
+// the template so the in-page nav scrolls correctly.
 export const pageSections = [
   { id: 'overview', label: 'Overview' },
   { id: 'using-the-app', label: 'Using the app' },

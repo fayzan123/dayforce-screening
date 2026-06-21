@@ -1,4 +1,7 @@
 <script setup>
+// Stacked bars of per-department cost, split either by compensation (salary vs
+// bonus) or by role (management vs IC) depending on `mode`. Bars are clickable
+// to cross-filter; pre-segmented rows come from lib/analytics.js.
 import { computed } from 'vue';
 import { formatCurrency } from '../../lib/format.js';
 
@@ -19,6 +22,7 @@ const props = defineProps({
 
 defineEmits(['select', 'mode']);
 
+// Bars share one scale (the largest department total) so widths are comparable.
 const maxTotal = computed(() => Math.max(1, ...props.rows.map((row) => row.total)));
 
 // Segment colors are semantic: compensation components and role categories keep

@@ -1,4 +1,7 @@
 <script setup>
+// Department x level density grid, toggled between headcount and salary. Cell
+// tint encodes intensity (see cellAlpha); the precomputed `heatmap` model with
+// its max values comes from lib/analytics.js.
 import { computed } from 'vue';
 import { formatCurrency, formatNumber } from '../../lib/format.js';
 
@@ -15,6 +18,8 @@ const props = defineProps({
 
 const emit = defineEmits(['mode']);
 
+// Group cells by department so each grid row renders in one v-for. Seed the map
+// from `departments` first to keep row order stable regardless of cell order.
 const cellsByDepartment = computed(() => {
   const map = new Map();
   for (const department of props.heatmap.departments) map.set(department, []);

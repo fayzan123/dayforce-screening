@@ -1,4 +1,7 @@
 <script setup>
+// Cross-filter controls for the analytics view: top departments/locations/levels
+// as toggle chips plus a Clear action. Emits filter intent only; the store holds
+// the active filters and recomputes every chart's slice.
 import { computed } from 'vue';
 import { X } from '@lucide/vue';
 

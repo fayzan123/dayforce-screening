@@ -1,6 +1,11 @@
+// Exercises the insight engine (lib/insights.js): which insights fire, how they
+// are worded, and that every emitted insight links to a known chart. Built on a
+// small synthetic analytics slice so each threshold can be probed in isolation.
 import { describe, expect, it } from 'vitest';
 import { deriveInsights, INSIGHT_CHART_IDS } from '../lib/insights.js';
 
+// Minimal analytics slice with sensible defaults; pass `overrides` to push a
+// specific dimension past (or below) a detection threshold for one test.
 function analyticsFixture(overrides = {}) {
   return {
     summary: {

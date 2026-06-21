@@ -1,4 +1,8 @@
 <script setup>
+// The "what stands out" briefing: a scope-aware heading plus a list of
+// InsightCards. Each card can expand the supporting chart inline, focused on the
+// insight's subject. Insights are derived upstream (lib/insights.js); this
+// component owns presentation and which card is expanded.
 import { computed, ref, watch } from 'vue';
 import InsightCard from './InsightCard.vue';
 
@@ -19,6 +23,7 @@ const props = defineProps({
 
 defineEmits(['find']);
 
+// Id of the card whose inline chart is expanded (only one open at a time).
 const openInsightId = ref(null);
 
 const chartById = computed(() => new Map(props.charts.map((chart) => [chart.id, chart])));
@@ -34,6 +39,8 @@ const activeScope = computed(() => {
 
 const heading = computed(() => (activeScope.value ? `Within ${activeScope.value}, what stands out` : 'What stands out'));
 
+// When filtering changes the insight set, collapse any open card whose insight
+// no longer exists so a stale chart can't linger.
 watch(
   () => props.insights.map((insight) => insight.id).join('|'),
   () => {

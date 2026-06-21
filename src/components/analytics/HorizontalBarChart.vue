@@ -1,4 +1,7 @@
 <script setup>
+// Reusable ranked horizontal bar list. Used for both the department and location
+// cost charts (and works for headcount via `valueType="number"`). Each bar is a
+// button so the parent can cross-filter on click via the `select` event.
 import { computed } from 'vue';
 import { formatCurrency, formatNumber } from '../../lib/format.js';
 
@@ -27,6 +30,9 @@ const props = defineProps({
 
 defineEmits(['select']);
 
+// Bars are sized relative to the largest row. Floor at 1 so an all-zero slice
+// never divides by zero; the template also floors each bar at 3% width so even
+// tiny groups stay visible.
 const maxValue = computed(() => Math.max(1, ...props.rows.map((row) => row[props.valueKey] ?? 0)));
 
 function formatValue(value) {

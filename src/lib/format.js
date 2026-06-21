@@ -74,6 +74,8 @@ export function initialsForName(name) {
     .join('');
 }
 
+// Stable, URL/DOM-safe key derived from a label. Used for insight ids and
+// element keys, so the same label always maps to the same slug across renders.
 export function slugKey(value) {
   return String(value ?? '')
     .trim()

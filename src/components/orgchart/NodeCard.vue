@@ -1,4 +1,7 @@
 <script setup>
+// One employee card in the org canvas: identity, department tone, level/role
+// tags, and (for managers) an expand/collapse toggle and rollup metrics. Purely
+// presentational — selection and expansion are emitted up to the canvas/store.
 import { computed } from 'vue';
 import { ChevronDown, ChevronRight } from '@lucide/vue';
 import { formatCurrency, formatMultiple, formatNumber, formatPercent } from '../../lib/format.js';

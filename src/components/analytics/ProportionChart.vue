@@ -1,4 +1,7 @@
 <script setup>
+// Department proportion: a single proportional band plus a ranked list, toggled
+// between salary share and headcount share. Rows flagged `isOther` are the
+// rolled-up long tail and are rendered as non-interactive (no useful filter).
 import { computed } from 'vue';
 import { formatCurrency, formatNumber, formatPercent } from '../../lib/format.js';
 
@@ -15,6 +18,8 @@ const props = defineProps({
 
 const emit = defineEmits(['mode', 'select']);
 
+// Drives the per-segment tint: the largest share maps to the strongest fill.
+// Floor avoids divide-by-zero when every share rounds to zero.
 const maxShare = computed(() => Math.max(0.01, ...props.rows.map((row) => row.share)));
 
 function formatValue(row) {

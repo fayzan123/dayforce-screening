@@ -1,4 +1,7 @@
 <script setup>
+// "How it works" page: renders the copy from aboutContent.js into sectioned docs
+// with an "On this page" nav. The only behavior here is the scroll-spy that keeps
+// that nav in sync with the scroll position.
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import {
   architectureNotes,

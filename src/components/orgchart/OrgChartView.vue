@@ -1,4 +1,8 @@
 <script setup>
+// Org-chart tab: composes the controls bar, the zoomable canvas, and the
+// selected-node inspector. State (expansion, selection, focus) lives in the
+// shared store; this view translates user actions into store calls and imperative
+// canvas moves (pan/zoom/fit) via a template ref.
 import { nextTick, ref } from 'vue';
 import { Users } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
@@ -7,6 +11,7 @@ import ChartControls from './ChartControls.vue';
 import OrgChartCanvas from './OrgChartCanvas.vue';
 
 const store = useOrgTree();
+// Imperative handle to the canvas for pan/zoom/fit, which are not state-driven.
 const canvas = ref(null);
 
 function jumpTo(node) {

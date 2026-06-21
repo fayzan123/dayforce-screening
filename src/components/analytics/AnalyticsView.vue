@@ -1,4 +1,8 @@
 <script setup>
+// Orchestrator for the cost-analytics tab. Pulls the shared org store, derives
+// the metric tiles, insight briefing, and chart grid from the current filtered
+// slice, and wires cross-filtering plus "view in org chart" hand-offs. Charts
+// themselves come from the registry (chartRegistry.js); this file is the glue.
 import { computed, ref } from 'vue';
 import { LocateFixed } from '@lucide/vue';
 import { useOrgTree } from '../../composables/useOrgTree.js';
@@ -10,6 +14,7 @@ import InsightBriefing from './InsightBriefing.vue';
 import MetricTile from './MetricTile.vue';
 
 const emit = defineEmits(['show-org']);
+// Shared singleton store, so analytics and the org chart see the same filters.
 const store = useOrgTree();
 const heatmapMode = ref('headcount');
 

@@ -1,4 +1,7 @@
 <script setup>
+// Application shell: owns the top bar, the three-tab switch (Org / Analytics /
+// About), the theme toggle, and the one-time data load. Tabs share a single org
+// store so a filter set in one view is reflected in the other.
 import { computed, onMounted, ref } from 'vue';
 import { AlertTriangle, BarChart3, BookOpen, GitBranch, Moon, RotateCcw, Sun } from '@lucide/vue';
 import AboutView from './components/about/AboutView.vue';
@@ -11,6 +14,9 @@ const store = useOrgTree();
 const activeTab = ref('org');
 const EMPTY_SUMMARY = Object.freeze({ headcount: 0, managers: 0, ics: 0, salary: 0 });
 
+// Header stats follow the active tab: the org chart always reflects the whole
+// company, while analytics reflects the current filtered slice. Fall back across
+// both (and finally an empty summary) so the bar never shows blanks mid-load.
 const summary = computed(() => {
   if (activeTab.value === 'org') return store.globalSummary.value ?? store.filteredSummary.value ?? EMPTY_SUMMARY;
   return store.filteredSummary.value ?? store.globalSummary.value ?? EMPTY_SUMMARY;

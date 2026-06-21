@@ -3,6 +3,9 @@ import { hierarchy, partition } from 'd3-hierarchy';
 export const ICICLE_WIDTH = 1000;
 export const ICICLE_LAYER_HEIGHT = 44;
 
+// Wrap each org node in a fresh `{ source, children }` object so d3.partition
+// can mutate layout fields on the copy while the real hierarchy (and its frozen
+// metrics) stays untouched. `source` keeps a handle back to the original node.
 function wrapNode(node) {
   return {
     source: node,
@@ -34,6 +37,8 @@ export function buildIciclePartition(focusNode, { mode = 'cost', depthLimit = 4,
   const visibleDepth = Math.min(layoutRoot.height, depthLimit);
   const nodes = layoutRoot
     .descendants()
+    // Keep rows within the depth budget and drop slivers narrower than ~0.65px,
+    // which would render as invisible/unclickable hairlines at 40k nodes.
     .filter((node) => node.depth <= depthLimit && node.x1 - node.x0 >= 0.65)
     .map((node) => ({
       id: node.data.source.id,

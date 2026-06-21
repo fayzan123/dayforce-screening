@@ -1,4 +1,7 @@
 <script setup>
+// Drill-down icicle of the cost (or headcount) footprint. Clicking a node with
+// children re-focuses the partition on it; "Up" walks back toward the root. The
+// layout math lives in lib/icicle.js; this component owns focus + mode state.
 import { computed, ref, watch } from 'vue';
 import { ChevronLeft, LocateFixed } from '@lucide/vue';
 import { buildIciclePartition } from '../../lib/icicle.js';
@@ -14,12 +17,15 @@ const props = defineProps({
 const emit = defineEmits(['view-node']);
 
 const mode = ref('cost');
+// Track focus by id (not node ref) so it survives the root being rebuilt; the
+// partition is recomputed whenever focus, mode, or the root changes.
 const focusId = ref(props.root.id);
 
 const focusNode = computed(() => props.root.descendants().find((node) => node.id === focusId.value) ?? props.root);
 const partition = computed(() => buildIciclePartition(focusNode.value, { mode: mode.value, depthLimit: 4 }));
 const canGoUp = computed(() => Boolean(focusNode.value.parent));
 
+// When the org chart hands over a new root, reset focus to its top.
 watch(
   () => props.root.id,
   (id) => {

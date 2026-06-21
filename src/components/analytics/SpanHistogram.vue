@@ -1,4 +1,6 @@
 <script setup>
+// Column histogram of managers bucketed by direct-report count (1:1 .. 1:4, plus
+// a folded 1:5+ tail). Shows whether the org leans toward thin or wide spans.
 import { computed } from 'vue';
 import { formatCurrency, formatNumber } from '../../lib/format.js';
 
@@ -9,6 +11,8 @@ const props = defineProps({
   },
 });
 
+// Always render buckets 1..4 (zero-filled when missing) so the axis is stable
+// across filters, then append a 5+ bucket only when wider spans actually exist.
 const normalizedRows = computed(() => {
   const bySpan = new Map(props.rows.map((row) => [row.span, row]));
   const base = [1, 2, 3, 4].map((span) => bySpan.get(span) ?? { span, label: `1:${span}`, headcount: 0, salary: 0 });
