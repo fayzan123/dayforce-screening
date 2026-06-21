@@ -8,16 +8,13 @@ Interactive org chart visualizer with hierarchy cost analytics for the Dayforce 
 
 A pre-built static deploy on GitHub Pages — opens instantly, no install step.
 
-**Code + running app, side by side:**
+**Code + running app, side by side:** https://stackblitz.com/github/fayzan123/dayforce-screening
 
-- **StackBlitz:** https://stackblitz.com/github/fayzan123/dayforce-screening
-- **CodeSandbox:** https://codesandbox.io/p/github/fayzan123/dayforce-screening/main
-
-Both import the repo and run `npm run dev`. The 12 MB dataset is hosted in a separate
-repo ([dayforce-org-data](https://github.com/fayzan123/dayforce-org-data)) and fetched
-at runtime over a CORS-enabled URL, so the app repo stays small enough for the online
-sandboxes to boot quickly. First load still parses 40k rows and rolls up metrics, so
-give it a moment.
+StackBlitz imports the repo and runs `npm run dev`. The 12 MB dataset is hosted in a
+separate repo ([dayforce-org-data](https://github.com/fayzan123/dayforce-org-data)) and
+fetched at runtime over a CORS-enabled URL, so the app repo stays small enough for the
+sandbox to boot quickly. First load still parses 40k rows and rolls up metrics, so give
+it a moment.
 
 ## Design
 
