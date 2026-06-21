@@ -4,9 +4,20 @@ Interactive org chart visualizer with hierarchy cost analytics for the Dayforce 
 
 ## Live demo
 
-**StackBlitz:** https://stackblitz.com/github/fayzan123/dayforce-screening
+**Hosted app (recommended):** https://fayzan123.github.io/dayforce-screening/
 
-StackBlitz imports the repo directly and runs `npm run dev`. The dataset is a single 12 MB CSV, so the first boot takes a moment while it installs, parses 40k rows, and rolls up metrics. For the fastest experience, running locally (below) is recommended.
+A pre-built static deploy on GitHub Pages — opens instantly, no install step.
+
+**Code + running app, side by side:**
+
+- **StackBlitz:** https://stackblitz.com/github/fayzan123/dayforce-screening
+- **CodeSandbox:** https://codesandbox.io/p/github/fayzan123/dayforce-screening/main
+
+Both import the repo and run `npm run dev`. The 12 MB dataset is hosted in a separate
+repo ([dayforce-org-data](https://github.com/fayzan123/dayforce-org-data)) and fetched
+at runtime over a CORS-enabled URL, so the app repo stays small enough for the online
+sandboxes to boot quickly. First load still parses 40k rows and rolls up metrics, so
+give it a moment.
 
 ## Design
 
@@ -36,7 +47,7 @@ npm install
 npm run dev
 ```
 
-Use Node 22, or any Node version supported by the package engine (`>=20.19.0`). Open the local URL printed by Vite. The CSV is served from `public/data/giga-corp.csv`.
+Use Node 22, or any Node version supported by the package engine (`>=20.19.0`). Open the local URL printed by Vite. The app fetches the dataset from the hosted [dayforce-org-data](https://github.com/fayzan123/dayforce-org-data) CSV (`DATA_URL` in `src/lib/parseCsv.js`); to point it at a local file instead, drop a copy at `public/data/giga-corp.csv` and set the default path accordingly.
 
 ## Verification
 

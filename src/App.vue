@@ -99,8 +99,8 @@ onMounted(() => {
           <p class="eyebrow">Data load failed</p>
           <h2>{{ store.error.value?.message }}</h2>
           <p>
-            Check that <code>public/data/giga-corp.csv</code> exists and that the CSV headers match the
-            assessment data.
+            The dataset is fetched from a hosted CSV. Check your network connection and that the
+            CSV headers match the assessment data.
           </p>
           <button type="button" class="status-action" @click="store.load()">
             <RotateCcw :size="16" aria-hidden="true" />

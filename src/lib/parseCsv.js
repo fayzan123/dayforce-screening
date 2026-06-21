@@ -49,14 +49,23 @@ function parseInWorker(csvText) {
 }
 
 /**
- * Load and parse the public CSV. The explicit Vite worker keeps the initial
+ * The 12 MB dataset is hosted in a separate repo and served over a CORS-enabled
+ * raw URL rather than committed here. That keeps this app repo small enough to
+ * boot quickly in online sandboxes (StackBlitz/CodeSandbox), which otherwise
+ * stall cloning or run the dev-server VM out of memory on the large file.
+ */
+export const DATA_URL =
+  'https://raw.githubusercontent.com/fayzan123/dayforce-org-data/main/giga-corp.csv';
+
+/**
+ * Load and parse the org CSV. The explicit Vite worker keeps the initial
  * 40k-row parse from blocking interactions; if the worker fails under a host
  * environment, the main-thread fallback preserves correctness.
  *
- * @param {string} path Public URL for the CSV file.
+ * @param {string} path URL for the CSV file.
  * @returns {Promise<Array<Record<string, string>>>}
  */
-export async function loadCsvRows(path = `${import.meta.env.BASE_URL}data/giga-corp.csv`) {
+export async function loadCsvRows(path = DATA_URL) {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Could not load ${path}: ${response.status} ${response.statusText}`);

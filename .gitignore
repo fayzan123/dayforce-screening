@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 # Helper docs
 docs/
 .gstack/
+
+# Large dataset is hosted separately (see src/lib/parseCsv.js DATA_URL)
+public/data/giga-corp.csv

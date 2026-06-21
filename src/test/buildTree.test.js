@@ -30,12 +30,18 @@ function row(id, manager, name, title, salary, bonus, level) {
   };
 }
 
+// The full dataset is hosted in a separate repo (see src/lib/parseCsv.js), so it
+// is not guaranteed to exist in a fresh clone. Resolve it from an env override or
+// a local copy under public/data, and skip the real-data test when it is absent.
+const realCsvPath =
+  process.env.GIGA_CORP_CSV ||
+  path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public/data/giga-corp.csv');
+const hasRealCsv = fs.existsSync(realCsvPath);
+
 function readRealCsv() {
   // Real-data invariants catch regressions that a tiny fixture cannot, such as
   // misreading quoted locations or accidentally including the root salary.
-  const here = path.dirname(fileURLToPath(import.meta.url));
-  const csvPath = path.resolve(here, '../../public/data/giga-corp.csv');
-  const csv = fs.readFileSync(csvPath, 'utf8');
+  const csv = fs.readFileSync(realCsvPath, 'utf8');
   const result = Papa.parse(csv, {
     header: true,
     skipEmptyLines: 'greedy',
@@ -111,7 +117,7 @@ describe('buildOrgTree', () => {
     expect(() => buildOrgTree([row('a', '', 'A Root', 'CEO', 'bad', 0, 1)])).toThrow(/Salary must be numeric/);
   });
 
-  it('matches real Giga Corp invariants', () => {
+  it.skipIf(!hasRealCsv)('matches real Giga Corp invariants', () => {
     const rows = readRealCsv();
     const { root, allNodes } = buildOrgTree(rows);
     const totalSalary = allNodes.reduce((acc, node) => acc + node.data.salary, 0);
