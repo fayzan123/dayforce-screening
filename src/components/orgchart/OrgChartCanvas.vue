@@ -19,9 +19,16 @@ import NodeCard from './NodeCard.vue';
  */
 
 const NODE_WIDTH = 292;
-const NODE_HEIGHT = 212;
+// Must match the real rendered manager-card height. Connectors begin at
+// `node.y + NODE_HEIGHT`; if this underestimates the card, the vertical stub and
+// the horizontal routing bus get painted *behind* the cards and the parent→child
+// grouping becomes impossible to trace. Measured against the live manager card.
+const NODE_HEIGHT = 276;
 const NODE_X = 348;
-const NODE_Y = 308;
+// Level separation. NODE_Y - NODE_HEIGHT is the clear vertical gap between a card's
+// bottom and its children's top, where the connector fan-out is drawn. Kept generous
+// so the grouping reads at a glance.
+const NODE_Y = 396;
 const PADDING = 120;
 const VISIBLE_NODE_WARNING = 1600;
 
