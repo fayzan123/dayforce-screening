@@ -21,8 +21,14 @@
     "type": "git",
     "url": "git+https://github.com/fayzan123/dayforce-screening.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "vue",
+    "tailwind",
+    "d3-hierarchy",
+    "org-chart",
+    "data-visualization"
+  ],
+  "author": "Fayzan Malik",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/fayzan123/dayforce-screening/issues"
@@ -35,9 +41,7 @@
     "d3-array": "^3.2.4",
     "d3-ease": "^3.0.1",
     "d3-hierarchy": "^3.1.2",
-    "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
-    "d3-shape": "^3.2.0",
     "d3-transition": "^3.0.1",
     "d3-zoom": "^3.0.0",
     "papaparse": "^5.5.4",
